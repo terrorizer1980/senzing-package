@@ -1,21 +1,20 @@
 #! /usr/bin/env python
 
 # -----------------------------------------------------------------------------
-# stream-loader.py Loader for streaming input.
+# senzing-package.py handles installation of the Senzing package.
 # -----------------------------------------------------------------------------
 
 import argparse
-# import configparser
-# from glob import glob
+import grp
 import json
 import logging
 import os
+import pwd
+import shutil
 import signal
 import sys
 import tarfile
 import time
-# import urllib2
-# from urlparse import urlparse
 
 __all__ = []
 __version__ = "1.0.0"  # See https://www.python.org/dev/peps/pep-0396/
@@ -84,6 +83,11 @@ def get_parser():
     subparser_4.add_argument("--senzing-package", dest="senzing_package", metavar="SENZING_PACKAGE", help="Path to Senzing package.  DEFAULT: downloads/Senzing_API.tgz")
     subparser_4.add_argument("--debug", dest="debug", action="store_true", help="Enable debugging. (SENZING_DEBUG) Default: False")
 
+    subparser_5 = subparsers.add_parser('install', help='Backup existing directory and install to a clean directory.')
+    subparser_5.add_argument("--senzing-dir", dest="senzing_dir", metavar="SENZING_DIR", help="Senzing directory.  DEFAULT: /opt/senzing")
+    subparser_5.add_argument("--senzing-package", dest="senzing_package", metavar="SENZING_PACKAGE", help="Path to Senzing package.  DEFAULT: downloads/Senzing_API.tgz")
+    subparser_5.add_argument("--debug", dest="debug", action="store_true", help="Enable debugging. (SENZING_DEBUG) Default: False")
+
     return parser
 
 # -----------------------------------------------------------------------------
@@ -105,6 +109,8 @@ message_dictionary = {
     "104": "Sleeping {0} seconds.",
     "105": "Version {0} detected in {1}.",
     "106": "Version {0} detected in Senzing package '{1}'.",
+    "107": "Archived {0} to {1}",
+    "108": "{0} extracted to {1}",
     "198": "For information on warnings and errors, see https://github.com/Senzing/stream-loader#errors",
     "199": "{0}",
     "200": "senzing-" + SENZING_PRODUCT_ID + "{0:04d}W",
@@ -352,6 +358,62 @@ def do_current_version(args):
     logging.info(exit_template(config))
 
 
+def do_install(args):
+    '''Get version in Senzing_API.tgz package.'''
+
+    # Get context from CLI, environment variables, and ini files.
+
+    config = get_configuration(args)
+
+    # Prolog.
+
+    common_prolog(config)
+
+    # Pull values from configuration.
+
+    senzing_dir = config.get('senzing_dir')
+    senzing_package = config.get('senzing_package')
+    
+    # Synthesize variables
+    
+    senzing_g2_dir = "{0}/g2".format(senzing_dir)
+
+    # Archive an existing directory.
+    # Note: Can't just archive senzing_dir because it may be an attached volume in a docker image.
+    
+    if os.path.exists(senzing_g2_dir):
+        timestamp = int(time.time())
+        senzing_g2_dir_backup = "{0}.{1}".format(senzing_g2_dir, timestamp)
+        shutil.move(senzing_g2_dir, senzing_g2_dir_backup)
+        logging.info(message_info(107, senzing_g2_dir, senzing_g2_dir_backup))
+
+    # Extract the tarball to senzing_dir.
+
+    try:
+        with tarfile.open(senzing_package) as senzing_package_file:
+            senzing_package_file.extractall(path=senzing_dir)
+            logging.info(message_info(108, senzing_package, senzing_dir))
+    except:
+        logging.info(message_warn(201, senzing_package))
+
+    # Determine ownership of senzing_dir.
+    
+    stat_info = os.stat(senzing_dir)
+    user_id = stat_info.st_uid
+    group_id = stat_info.st_gid  
+    
+    # Adjust file ownership.
+    
+    for dirpath, dirnames, filenames in os.walk(senzing_dir):
+        for dname in dirnames:
+            os.chown(os.path.join(dirpath, dname), user_id, group_id)
+        for fname in filenames:
+            os.chown(os.path.join(dirpath, fname), user_id, group_id)
+
+    # Epilog.
+
+    logging.info(exit_template(config))
+    
 def do_package_version(args):
     '''Get version in Senzing_API.tgz package.'''
 
