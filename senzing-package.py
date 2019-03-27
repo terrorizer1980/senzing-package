@@ -359,7 +359,7 @@ def do_current_version(args):
 
 
 def do_install(args):
-    '''Get version in Senzing_API.tgz package.'''
+    '''Install Senzing_API.tgz package.'''
 
     # Get context from CLI, environment variables, and ini files.
 
