@@ -19,7 +19,7 @@ import time
 __all__ = []
 __version__ = "1.0.0"  # See https://www.python.org/dev/peps/pep-0396/
 __date__ = '2019-03-27'
-__updated__ = '2019-03-27'
+__updated__ = '2019-03-30'
 
 SENZING_PRODUCT_ID = "5003"  # See https://github.com/Senzing/knowledge-base/blob/master/lists/senzing-product-ids.md
 log_format = '%(asctime)s %(message)s'
@@ -310,6 +310,26 @@ def exit_silently():
     sys.exit(1)
 
 
+def get_current_version(config):
+
+    result = None
+
+    senzing_dir = config.get('senzing_dir')
+    version_file = "{0}/g2/data/g2BuildVersion.json".format(senzing_dir)
+
+    # Read version file.
+
+    try:
+        with open(version_file) as version_json_file:
+            version_dictionary = json.load(version_json_file)
+            result = version_dictionary.get('VERSION')
+            logging.info(message_info(105, result, version_file))
+    except:
+        logging.info(message_warn(201, version_file))
+
+    return result
+
+
 def common_prolog(config):
 
     validate_configuration(config)
@@ -337,21 +357,7 @@ def do_current_version(args):
 
     # Pull values from configuration.
 
-    senzing_dir = config.get('senzing_dir')
-
-    # Synthesize variables
-
-    version_file = "{0}/g2/data/g2BuildVersion.json".format(senzing_dir)
-
-    # Read version file.
-
-    try:
-        with open(version_file) as version_json_file:
-            version_dictionary = json.load(version_json_file)
-            logging.info(message_info(105, version_dictionary.get('VERSION'), version_file))
-
-    except:
-        logging.info(message_warn(201, version_file))
+    current_version = get_current_version(config)
 
     # Epilog.
 
@@ -373,17 +379,26 @@ def do_install(args):
 
     senzing_dir = config.get('senzing_dir')
     senzing_package = config.get('senzing_package')
-    
+
     # Synthesize variables
-    
+
     senzing_g2_dir = "{0}/g2".format(senzing_dir)
 
     # Archive an existing directory.
     # Note: Can't just archive senzing_dir because it may be an attached volume in a docker image.
-    
+
     if os.path.exists(senzing_g2_dir):
-        timestamp = int(time.time())
-        senzing_g2_dir_backup = "{0}.{1}".format(senzing_g2_dir, timestamp)
+
+        # Construct backup directory name.
+
+        senzing_g2_dir_backup = senzing_g2_dir
+        current_version = get_current_version(config)
+        if current_version:
+            senzing_g2_dir_backup = "{0}-{1}".format(senzing_g2_dir_backup, current_version)
+        senzing_g2_dir_backup = "{0}.{1}".format(senzing_g2_dir_backup, int(time.time()))
+
+        # Move directory.
+
         shutil.move(senzing_g2_dir, senzing_g2_dir_backup)
         logging.info(message_info(107, senzing_g2_dir, senzing_g2_dir_backup))
 
@@ -397,13 +412,13 @@ def do_install(args):
         logging.info(message_warn(201, senzing_package))
 
     # Determine ownership of senzing_dir.
-    
+
     stat_info = os.stat(senzing_dir)
     user_id = stat_info.st_uid
-    group_id = stat_info.st_gid  
-    
+    group_id = stat_info.st_gid
+
     # Adjust file ownership.
-    
+
     for dirpath, dirnames, filenames in os.walk(senzing_dir):
         for dname in dirnames:
             os.chown(os.path.join(dirpath, dname), user_id, group_id)
@@ -413,7 +428,8 @@ def do_install(args):
     # Epilog.
 
     logging.info(exit_template(config))
-    
+
+
 def do_package_version(args):
     '''Get version in Senzing_API.tgz package.'''
 

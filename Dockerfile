@@ -8,24 +8,18 @@ LABEL Name="senzing/senzing-package" \
 
 # Install packages via apt.
 
-# RUN apt-get update \
-#  && apt-get -y install \
-#     librdkafka-dev \
-#  && rm -rf /var/lib/apt/lists/*
-
-# Perform PIP installs.
-
-# RUN pip install \
-#     configparser \
-#     confluent-kafka \
-#     psutil
+RUN apt-get update \
+ && apt-get -y install \
+    python \
+ && rm -rf /var/lib/apt/lists/*
 
 # Copy into the app directory.
 
-COPY ./senzing-package /app/
+COPY ./senzing-package.py /app/
+COPY ./downloads/Senzing_API.tgz /app/downloads/
 
 # Override parent docker image.
 
 WORKDIR /app
-ENTRYPOINT ["/app/senzing-package.py"]
+ENTRYPOINT /app/senzing-package.py
 CMD [""]
