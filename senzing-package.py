@@ -287,6 +287,22 @@ def create_signal_handler_function(args):
     return result_function
 
 
+def delete_sentinal_files(config):
+
+    senzing_dir = config.get('senzing_dir')
+
+    files = [
+        "{0}/docker-runs.sentinel".format(senzing_dir)
+    ]
+
+    for file in files:
+        try:
+            os.remove(file)
+            logging.info(message_info(110, senzing_g2_dir))
+        except:
+            pass
+
+
 def entry_template(config):
     '''Format of entry message.'''
     config['start_time'] = time.time()
@@ -408,6 +424,8 @@ def do_delete(args):
         logging.info(message_info(109, senzing_g2_dir, current_version))
         shutil.rmtree(senzing_g2_dir)
 
+    delete_sentinal_files(config)
+
     # Epilog.
 
     logging.info(message_info(110, senzing_g2_dir))
@@ -460,6 +478,8 @@ def do_install(args):
             logging.info(message_info(108, senzing_package, senzing_dir))
     except:
         logging.info(message_warn(201, senzing_package))
+
+    delete_sentinal_files(config)
 
     # Determine ownership of senzing_dir.
 
@@ -557,6 +577,8 @@ def do_replace(args):
             logging.info(message_info(108, senzing_package, senzing_dir))
     except:
         logging.info(message_warn(201, senzing_package))
+
+    delete_sentinal_files(config)
 
     # Determine ownership of senzing_dir.
 
