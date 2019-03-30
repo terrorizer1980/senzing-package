@@ -88,11 +88,11 @@ def get_parser():
     subparser_5.add_argument("--senzing-package", dest="senzing_package", metavar="SENZING_PACKAGE", help="Path to Senzing package.  DEFAULT: downloads/Senzing_API.tgz")
     subparser_5.add_argument("--debug", dest="debug", action="store_true", help="Enable debugging. (SENZING_DEBUG) Default: False")
 
-    subparser_6 = subparsers.add_parser('delete', help='Delete existing directory and install to a clean directory.')
+    subparser_6 = subparsers.add_parser('delete', help='Delete existing directory.')
     subparser_6.add_argument("--senzing-dir", dest="senzing_dir", metavar="SENZING_DIR", help="Senzing directory.  DEFAULT: /opt/senzing")
     subparser_6.add_argument("--debug", dest="debug", action="store_true", help="Enable debugging. (SENZING_DEBUG) Default: False")
 
-    subparser_7 = subparsers.add_parser('replace', help='Remove existing directory and install to a clean directory.')
+    subparser_7 = subparsers.add_parser('replace', help='Delete existing directory and install to a clean directory.')
     subparser_7.add_argument("--senzing-dir", dest="senzing_dir", metavar="SENZING_DIR", help="Senzing directory.  DEFAULT: /opt/senzing")
     subparser_7.add_argument("--senzing-package", dest="senzing_package", metavar="SENZING_PACKAGE", help="Path to Senzing package.  DEFAULT: downloads/Senzing_API.tgz")
     subparser_7.add_argument("--debug", dest="debug", action="store_true", help="Enable debugging. (SENZING_DEBUG) Default: False")

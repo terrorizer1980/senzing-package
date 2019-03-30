@@ -10,14 +10,14 @@ To see all of the subcommands, run:
 ```console
 $ ./senzing-package.py --help
 usage: senzing-package.py [-h]
-                          {version,sleep,current-version,package-version,install}
+                          {version,sleep,current-version,package-version,install,delete,replace}
                           ...
 
 Senzing package management. For more information, see
 https://github.com/senzing/senzing-package
 
 positional arguments:
-  {version,sleep,current-version,package-version,install}
+  {version,sleep,current-version,package-version,install,delete,replace}
                         Subcommands (SENZING_SUBCOMMAND):
     version             Print the version of senzing-package.py.
     sleep               Do nothing but sleep. For Docker testing.
@@ -26,10 +26,12 @@ positional arguments:
     package-version     Show the version of the Senzing_API.tgz package.
     install             Backup existing directory and install to a clean
                         directory.
+    delete              Delete existing directory.
+    replace             Delete existing directory and install to a clean
+                        directory.
 
 optional arguments:
   -h, --help            show this help message and exit
-
 ```
 
 ### Contents
