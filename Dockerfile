@@ -16,7 +16,7 @@ RUN apt-get update \
 # Copy into the app directory.
 
 COPY ./senzing-package.py /app/
-COPY ./downloads/Senzing_API.tgz /app/downloads/
+COPY ./downloads/ /app/downloads/
 
 # Override parent docker image.
 

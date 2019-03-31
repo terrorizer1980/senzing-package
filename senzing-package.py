@@ -19,7 +19,7 @@ import time
 __all__ = []
 __version__ = "1.0.0"  # See https://www.python.org/dev/peps/pep-0396/
 __date__ = '2019-03-27'
-__updated__ = '2019-03-30'
+__updated__ = '2019-03-31'
 
 SENZING_PRODUCT_ID = "5003"  # See https://github.com/Senzing/knowledge-base/blob/master/lists/senzing-product-ids.md
 log_format = '%(asctime)s %(message)s'
@@ -479,6 +479,16 @@ def do_install(args):
     except:
         logging.info(message_warn(201, senzing_package))
 
+    # FIXME:  Temporary work-around
+
+    fix_source = "downloads/G2Database.py"
+    fix_destination = "{0}/python/G2Database.py".format(senzing_g2_dir)
+    fix_destination_backup = "{0}.{1}".format(fix_destination, int(time.time()))
+    shutil.move(fix_destination, fix_destination_backup)
+    shutil.copyfile(fix_source, fix_destination)
+
+    # Delete sentinal files.
+
     delete_sentinal_files(config)
 
     # Determine ownership of senzing_dir.
@@ -577,6 +587,16 @@ def do_replace(args):
             logging.info(message_info(108, senzing_package, senzing_dir))
     except:
         logging.info(message_warn(201, senzing_package))
+
+    # FIXME:  Temporary work-around
+
+    fix_source = "downloads/G2Database.py"
+    fix_destination = "{0}/python/G2Database.py".format(senzing_g2_dir)
+    fix_destination_backup = "{0}.{1}".format(fix_destination, int(time.time()))
+    shutil.move(fix_destination, fix_destination_backup)
+    shutil.copyfile(fix_source, fix_destination)
+
+    # Delete sentinal files.
 
     delete_sentinal_files(config)
 
