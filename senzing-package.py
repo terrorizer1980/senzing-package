@@ -482,10 +482,11 @@ def do_install(args):
     # FIXME:  Temporary work-around
 
     fix_source = "downloads/G2Database.py"
-    fix_destination = "{0}/python/G2Database.py".format(senzing_g2_dir)
-    fix_destination_backup = "{0}.{1}".format(fix_destination, int(time.time()))
-    shutil.move(fix_destination, fix_destination_backup)
-    shutil.copyfile(fix_source, fix_destination)
+    if os.path.exists(fix_source):
+        fix_destination = "{0}/python/G2Database.py".format(senzing_g2_dir)
+        fix_destination_backup = "{0}.{1}".format(fix_destination, int(time.time()))
+        shutil.move(fix_destination, fix_destination_backup)
+        shutil.copyfile(fix_source, fix_destination)
 
     # Delete sentinal files.
 
@@ -591,10 +592,11 @@ def do_replace(args):
     # FIXME:  Temporary work-around
 
     fix_source = "downloads/G2Database.py"
-    fix_destination = "{0}/python/G2Database.py".format(senzing_g2_dir)
-    fix_destination_backup = "{0}.{1}".format(fix_destination, int(time.time()))
-    shutil.move(fix_destination, fix_destination_backup)
-    shutil.copyfile(fix_source, fix_destination)
+    if os.path.exists(fix_source):
+        fix_destination = "{0}/python/G2Database.py".format(senzing_g2_dir)
+        fix_destination_backup = "{0}.{1}".format(fix_destination, int(time.time()))
+        shutil.move(fix_destination, fix_destination_backup)
+        shutil.copyfile(fix_source, fix_destination)
 
     # Delete sentinal files.
 
