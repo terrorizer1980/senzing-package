@@ -47,7 +47,7 @@ optional arguments:
     1. [Prerequisite software](#prerequisite-software)
     1. [Clone repository](#clone-repository)
     1. [Downloads](#downloads)
-    1. [Build docker image for development](#build-docker-image-for-developmen
+    1. [Build docker image for development](#build-docker-image-for-development)
 1. [Examples](#examples)
 1. [Errors](errors)
 
@@ -65,8 +65,16 @@ See [Develop](#develop).
 
 ### Configuration
 
-- **SENZING_SUBCOMMAND** -
-  Identify the subcommand to be run. See `stream-loader.py --help` for complete list.
+* **SENZING_DEBUG** -
+  Enable debug information. Values: 0=no debug; 1=debug. Default: 0.
+* **SENZING_DIR** -
+  Location of Senzing libraries. Default: "/opt/senzing".  
+* **SENZING_PACKAGE** -
+  Full path name to Senzing_API.tgz.  Example: `/tmp/Senzing_API.tgz`.  
+* **SENZING_SLEEP_TIME** -
+  Number of seconds to sleep when using `sleep` subcommand.  Usually used for debugging.  Default: 6600 (1 hour).
+* **SENZING_SUBCOMMAND** -
+  Identify the subcommand to be run. See `senzing-package.py --help` for complete list.
   
 1. To determine which configuration parameters are use for each `<subcommand>`, run:
 
@@ -150,6 +158,23 @@ The following software programs need to be installed:
 
 1. Visit [Downloading Senzing_API.tgz](https://github.com/Senzing/knowledge-base/blob/master/HOWTO/create-senzing-dir.md#downloading-senzing_apitgz)
 1. Download `Senzing_API.tgz` to ${GIT_REPOSITORY_DIR}/[downloads](./downloads) directory.
+
+#### Download ibm_data_server_driver_for_odbc_cli_linuxx64_v11.1.tar.gz
+
+1. Visit [Download initial Version 11.1 clients and drivers](http://www-01.ibm.com/support/docview.wss?uid=swg21385217)
+    1. Click on "[IBM Data Server Driver for ODBC and CLI (CLI Driver)](http://www.ibm.com/services/forms/preLogin.do?source=swg-idsoc97)" link.
+    1. Select :radio_button:  "IBM Data Server Driver for ODBC and CLI (Linux AMD64 and Intel EM64T)"
+    1. Click "Continue" button.
+    1. Choose download method and click "Download now" button.
+    1. Download `ibm_data_server_driver_for_odbc_cli_linuxx64_v11.1.tar.gz` to ${GIT_REPOSITORY_DIR}/[downloads](./downloads) directory.
+
+#### Download v11.1.4fp4a_jdbc_sqlj.tar.gz
+
+1. Visit [DB2 JDBC Driver Versions and Downloads](http://www-01.ibm.com/support/docview.wss?uid=swg21363866)
+    1. In DB2 Version 11.1 > JDBC 3.0 Driver version, click on "3.72.52" link.
+    1. Click on "DSClients--jdbc_sqlj-11.1.4.4-FP004a" link.
+    1. Click on "v11.1.4fp4a_jdbc_sqlj.tar.gz" link to download.
+    1. Download `v11.1.4fp4a_jdbc_sqlj.tar.gz` to ${GIT_REPOSITORY_DIR}/[downloads](./downloads) directory.
 
 ### Build docker image for development
 
