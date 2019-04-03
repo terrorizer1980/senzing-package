@@ -416,6 +416,14 @@ def install_files(config):
                 if not filename in approved_ibm_files:
                     os.remove(filename)
 
+    # FIXME: Work-around for lack of IBM crypto support.
+
+    touch_files = [
+        "{0}/db2/clidriver/bin/crypto_not_installed".format(senzing_dir)
+    ]
+    for touch_file in touch_files:
+        touch(touch_file)
+
     # Remove all empty directories.
 
     directories = [
@@ -604,6 +612,14 @@ def common_prolog(config):
     '''Common steps for most do_* functions.'''
     validate_configuration(config)
     logging.info(entry_template(config))
+
+
+def touch(path):
+    base_dir = os.path.dirname(path)
+    if not os.path.exists(base_dir):
+        os.makedirs(base_dir)
+    with open(path, 'a'):
+        os.utime(path, None)
 
 # -----------------------------------------------------------------------------
 # do_* functions
