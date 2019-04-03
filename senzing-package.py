@@ -15,11 +15,12 @@ import signal
 import sys
 import tarfile
 import time
+import zipfile
 
 __all__ = []
 __version__ = "1.0.0"  # See https://www.python.org/dev/peps/pep-0396/
 __date__ = '2019-03-27'
-__updated__ = '2019-03-31'
+__updated__ = '2019-04-02'
 
 SENZING_PRODUCT_ID = "5003"  # See https://github.com/Senzing/knowledge-base/blob/master/lists/senzing-product-ids.md
 log_format = '%(asctime)s %(message)s'
@@ -122,10 +123,16 @@ message_dictionary = {
     "108": "{0} extracted to {1}",
     "109": "Deleting {0} at version {1}.",
     "110": "{0} deleted.",
+    "111": "{0} copied to {1}.",
     "198": "For information on warnings and errors, see https://github.com/Senzing/stream-loader#errors",
     "199": "{0}",
     "200": "senzing-" + SENZING_PRODUCT_ID + "{0:04d}W",
     "201": "Cannot determine version. {0} does not exist.",
+    "202": "Cannot move {0} to {1}.",
+    "203": "Cannot extract {0} to {1}.",
+    "204": "Cannot copy {0} to {1}.",
+    "205": "Cannot extract {0}.",
+    "206": "Cannot copy {0}.",
     "400": "senzing-" + SENZING_PRODUCT_ID + "{0:04d}E",
     "498": "Bad SENZING_SUBCOMMAND: {0}.",
     "499": "No processing done.",
@@ -271,6 +278,218 @@ def validate_configuration(config):
         exit_error(499)
 
 # -----------------------------------------------------------------------------
+# Archive functions
+# -----------------------------------------------------------------------------
+
+
+def archive_path(source, current_version):
+
+    # Construct backup name.
+
+    target = source
+    if current_version:
+        target = "{0}-{1}".format(target, current_version)
+    target = "{0}.{1}".format(target, int(time.time()))
+
+    # Move path.
+
+    try:
+        shutil.move(source, target)
+        logging.info(message_info(107, source, target))
+    except:
+        logging.info(message_warn(202, source, target))
+
+
+def archive_paths(config):
+    # Note: Can't just archive senzing_dir (/opt/senzing) because it may be an attached volume in a docker image.
+
+    # Pull values from configuration.
+
+    senzing_dir = config.get('senzing_dir')
+
+    # Synthesize variables.
+
+    current_version = get_current_version(config)
+    paths = [
+        "{0}/g2".format(senzing_dir),
+        "{0}/db2".format(senzing_dir),
+    ]
+
+    # Archive paths.
+
+    for path in paths:
+        if os.path.exists(path):
+            archive_path(path, current_version)
+
+# -----------------------------------------------------------------------------
+# Install functions
+# -----------------------------------------------------------------------------
+
+
+def install_tgz(config, manifest):
+    source = manifest.get("source")
+    target = manifest.get("target")
+    try:
+        with tarfile.open(source) as compressed_file:
+            compressed_file.extractall(path=target)
+            logging.info(message_info(108, source, target))
+    except:
+        logging.info(message_warn(203, source, target))
+
+
+def install_file(config, manifest):
+
+    source = manifest.get("source")
+    target = manifest.get("target")
+
+    target_backup = "{0}.{1}".format(target, int(time.time()))
+
+    try:
+        shutil.move(target, target_backup)
+        logging.info(message_info(107, target, target_backup))
+
+        shutil.copyfile(source, target)
+        logging.info(message_warn(111, source, target))
+    except:
+        logging.info(message_warn(204, source, target))
+
+
+def install_zip(config, manifest):
+    source = manifest.get("source")
+    target = manifest.get("target")
+    try:
+        with zipfile.ZipFile(source, 'r') as compressed_file:
+            compressed_file.extractall(target)
+            logging.info(message_info(108, source, target))
+    except:
+        logging.info(message_warn(203, source, target))
+
+
+def install_files(config):
+
+    senzing_dir = config.get('senzing_dir')
+    manifests = [
+        {
+            'source': config.get('senzing_package'),
+            'target': senzing_dir,
+            'function': install_tgz
+        }, {
+            'source': "downloads/ibm_data_server_driver_for_odbc_cli_linuxx64_v11.1.tar.gz",
+            'target': "{0}/db2".format(senzing_dir),
+            'function': install_tgz
+        }, {
+            'source': "downloads/v11.1.4fp4a_jdbc_sqlj.tar.gz",
+            'target': "{0}/db2/jdbc".format(senzing_dir),
+            'function': install_tgz
+        }, {
+            'source': "{0}/db2/jdbc/jdbc_sqlj/db2_db2driver_for_jdbc_sqlj.zip".format(senzing_dir),
+            'target': "{0}/db2/jdbc".format(senzing_dir),
+            'function': install_zip
+        }, {
+            'source': "downloads/G2Database.py",
+            'target': "{0}/g2/python/G2Database.py".format(senzing_dir),
+            'function': install_file
+        }
+    ]
+
+    for manifest in manifests:
+        source = manifest.get("source")
+        if os.path.exists(source):
+            manifest.get("function")(config, manifest)
+
+    # Remove all non-approved files.
+
+    approved_ibm_files = get_approved_ibm_files(config)
+    directories = [
+        "{0}/db2".format(senzing_dir)
+    ]
+    for directory in directories:
+        for dirpath, dirnames, filenames in os.walk(directory):
+            for fname in filenames:
+                filename = os.path.join(dirpath, fname)
+                if not filename in approved_ibm_files:
+                    os.remove(filename)
+
+    # Remove all empty directories.
+
+    directories = [
+        "{0}/db2".format(senzing_dir)
+    ]
+    for directory in directories:
+        delete_empty_directories(directory)
+
+
+def delete_files(config):
+    
+    senzing_dir = config.get('senzing_dir')
+    current_version = get_current_version(config)
+    directories = [
+        "{0}/g2".format(senzing_dir),
+        "{0}/db2".format(senzing_dir)
+    ]
+
+    # Archive an existing directory.
+    # Note: Can't just archive senzing_dir because it may be an attached volume in a docker image.
+
+    for directory in directories:
+        if os.path.exists(directory):
+            logging.info(message_info(109, directory, current_version))
+            shutil.rmtree(directory)
+            logging.info(message_info(110, directory))
+
+
+def delete_empty_directories(path):
+
+    for dirpath, dirnames, filenames in os.walk(path, topdown=False):
+        for dname in dirnames:
+            directory = os.path.join(dirpath, dname)
+            if not os.listdir(directory):
+                os.rmdir(directory)
+
+
+def get_approved_ibm_files(config):
+    senzing_dir = config.get('senzing_dir')
+
+    return [
+        "{0}/db2/clidriver/adm/db2trc".format(senzing_dir),
+        "{0}/db2/clidriver/bin/db2dsdcfgfill".format(senzing_dir),
+        "{0}/db2/clidriver/bin/db2ldcfg".format(senzing_dir),
+        "{0}/db2/clidriver/bin/db2lddrg".format(senzing_dir),
+        "{0}/db2/clidriver/bin/db2level".format(senzing_dir),
+        "{0}/db2/clidriver/cfg/db2cli.ini.sample".format(senzing_dir),
+        "{0}/db2/clidriver/cfg/db2dsdriver.cfg.sample".format(senzing_dir),
+        "{0}/db2/clidriver/cfg/db2dsdriver.xsd".format(senzing_dir),
+        "{0}/db2/clidriver/conv/alt/08501252.cnv".format(senzing_dir),
+        "{0}/db2/clidriver/conv/alt/12520850.cnv".format(senzing_dir),
+        "{0}/db2/clidriver/conv/alt/IBM00850.ucs".format(senzing_dir),
+        "{0}/db2/clidriver/conv/alt/IBM01252.ucs".format(senzing_dir),
+        "{0}/db2/clidriver/include/sqlca.h".format(senzing_dir),
+        "{0}/db2/clidriver/include/sqlcli1.h".format(senzing_dir),
+        "{0}/db2/clidriver/include/sqlcli.h".format(senzing_dir),
+        "{0}/db2/clidriver/include/sql.h".format(senzing_dir),
+        "{0}/db2/clidriver/include/sqlsystm.h".format(senzing_dir),
+        "{0}/db2/clidriver/lib/libdb2o.so".format(senzing_dir),
+        "{0}/db2/clidriver/lib/libdb2o.so.1".format(senzing_dir),
+        "{0}/db2/clidriver/lib/libdb2.so".format(senzing_dir),
+        "{0}/db2/clidriver/lib/libdb2.so.1".format(senzing_dir),
+        "{0}/db2/clidriver/msg/en_US.iso88591/db2admh.mo".format(senzing_dir),
+        "{0}/db2/clidriver/msg/en_US.iso88591/db2adm.mo".format(senzing_dir),
+        "{0}/db2/clidriver/msg/en_US.iso88591/db2clia1.lst".format(senzing_dir),
+        "{0}/db2/clidriver/msg/en_US.iso88591/db2clias.lst".format(senzing_dir),
+        "{0}/db2/clidriver/msg/en_US.iso88591/db2clih.mo".format(senzing_dir),
+        "{0}/db2/clidriver/msg/en_US.iso88591/db2cli.mo".format(senzing_dir),
+        "{0}/db2/clidriver/msg/en_US.iso88591/db2clit.mo".format(senzing_dir),
+        "{0}/db2/clidriver/msg/en_US.iso88591/db2clp.mo".format(senzing_dir),
+        "{0}/db2/clidriver/msg/en_US.iso88591/db2diag.mo".format(senzing_dir),
+        "{0}/db2/clidriver/msg/en_US.iso88591/db2sqlh.mo".format(senzing_dir),
+        "{0}/db2/clidriver/msg/en_US.iso88591/db2sql.mo".format(senzing_dir),
+        "{0}/db2/jdbc/db2jcc4.jar".format(senzing_dir),
+        "{0}/db2/jdbc/db2jcc.jar".format(senzing_dir),
+        "{0}/db2/jdbc/sqlj4.zip".format(senzing_dir),
+        "{0}/db2/jdbc/sqlj.zip".format(senzing_dir),
+    ]
+
+# -----------------------------------------------------------------------------
 # Utility functions
 # -----------------------------------------------------------------------------
 
@@ -337,6 +556,25 @@ def exit_silently():
     sys.exit(1)
 
 
+def file_ownership(config):
+
+    senzing_dir = config.get('senzing_dir')
+
+    # Determine ownership of senzing_dir.
+
+    stat_info = os.stat(senzing_dir)
+    user_id = stat_info.st_uid
+    group_id = stat_info.st_gid
+
+    # Adjust file ownership.
+
+    for dirpath, dirnames, filenames in os.walk(senzing_dir):
+        for dname in dirnames:
+            os.chown(os.path.join(dirpath, dname), user_id, group_id)
+        for fname in filenames:
+            os.chown(os.path.join(dirpath, fname), user_id, group_id)
+
+
 def get_current_version(config):
 
     result = None
@@ -382,9 +620,9 @@ def do_current_version(args):
 
     common_prolog(config)
 
-    # Pull values from configuration.
+    # Perform action.
 
-    current_version = get_current_version(config)
+    get_current_version(config)
 
     # Epilog.
 
@@ -392,7 +630,7 @@ def do_current_version(args):
 
 
 def do_delete(args):
-    '''Install Senzing_API.tgz package.'''
+    '''Delete the installed Senzing_API.tgz .'''
 
     # Get context from CLI, environment variables, and ini files.
 
@@ -402,33 +640,13 @@ def do_delete(args):
 
     common_prolog(config)
 
-    # Pull values from configuration.
+    # Perform action.
 
-    senzing_dir = config.get('senzing_dir')
-
-    # Synthesize variables
-
-    senzing_g2_dir = "{0}/g2".format(senzing_dir)
-
-    # Archive an existing directory.
-    # Note: Can't just archive senzing_dir because it may be an attached volume in a docker image.
-
-    if os.path.exists(senzing_g2_dir):
-
-        # Determine version of existing Senzing directory.
-
-        current_version = get_current_version(config)
-
-        # Delete directory.
-
-        logging.info(message_info(109, senzing_g2_dir, current_version))
-        shutil.rmtree(senzing_g2_dir)
-
+    delete_files(config)
     delete_sentinal_files(config)
 
     # Epilog.
 
-    logging.info(message_info(110, senzing_g2_dir))
     logging.info(exit_template(config))
 
 
@@ -443,68 +661,12 @@ def do_install(args):
 
     common_prolog(config)
 
-    # Pull values from configuration.
+    # Perform action.
 
-    senzing_dir = config.get('senzing_dir')
-    senzing_package = config.get('senzing_package')
-
-    # Synthesize variables
-
-    senzing_g2_dir = "{0}/g2".format(senzing_dir)
-
-    # Archive an existing directory.
-    # Note: Can't just archive senzing_dir because it may be an attached volume in a docker image.
-
-    if os.path.exists(senzing_g2_dir):
-
-        # Construct backup directory name.
-
-        senzing_g2_dir_backup = senzing_g2_dir
-        current_version = get_current_version(config)
-        if current_version:
-            senzing_g2_dir_backup = "{0}-{1}".format(senzing_g2_dir_backup, current_version)
-        senzing_g2_dir_backup = "{0}.{1}".format(senzing_g2_dir_backup, int(time.time()))
-
-        # Move directory.
-
-        shutil.move(senzing_g2_dir, senzing_g2_dir_backup)
-        logging.info(message_info(107, senzing_g2_dir, senzing_g2_dir_backup))
-
-    # Extract the tarball to senzing_dir.
-
-    try:
-        with tarfile.open(senzing_package) as senzing_package_file:
-            senzing_package_file.extractall(path=senzing_dir)
-            logging.info(message_info(108, senzing_package, senzing_dir))
-    except:
-        logging.info(message_warn(201, senzing_package))
-
-    # FIXME:  Temporary work-around
-
-    fix_source = "downloads/G2Database.py"
-    if os.path.exists(fix_source):
-        fix_destination = "{0}/python/G2Database.py".format(senzing_g2_dir)
-        fix_destination_backup = "{0}.{1}".format(fix_destination, int(time.time()))
-        shutil.move(fix_destination, fix_destination_backup)
-        shutil.copyfile(fix_source, fix_destination)
-
-    # Delete sentinal files.
-
+    archive_paths(config)
     delete_sentinal_files(config)
-
-    # Determine ownership of senzing_dir.
-
-    stat_info = os.stat(senzing_dir)
-    user_id = stat_info.st_uid
-    group_id = stat_info.st_gid
-
-    # Adjust file ownership.
-
-    for dirpath, dirnames, filenames in os.walk(senzing_dir):
-        for dname in dirnames:
-            os.chown(os.path.join(dirpath, dname), user_id, group_id)
-        for fname in filenames:
-            os.chown(os.path.join(dirpath, fname), user_id, group_id)
+    install_files(config)
+    file_ownership(config)
 
     # Epilog.
 
@@ -557,64 +719,12 @@ def do_replace(args):
 
     common_prolog(config)
 
-    # Pull values from configuration.
+    # Perform action.
 
-    senzing_dir = config.get('senzing_dir')
-    senzing_package = config.get('senzing_package')
-
-    # Synthesize variables
-
-    senzing_g2_dir = "{0}/g2".format(senzing_dir)
-
-    # Remove an existing directory.
-
-    if os.path.exists(senzing_g2_dir):
-
-        # Determine version of existing Senzing directory.
-
-        current_version = get_current_version(config)
-
-        # Delete directory.
-
-        logging.info(message_info(109, senzing_g2_dir, current_version))
-        shutil.rmtree(senzing_g2_dir)
-        logging.info(message_info(110, senzing_g2_dir))
-
-    # Extract the tarball to senzing_dir.
-
-    try:
-        with tarfile.open(senzing_package) as senzing_package_file:
-            senzing_package_file.extractall(path=senzing_dir)
-            logging.info(message_info(108, senzing_package, senzing_dir))
-    except:
-        logging.info(message_warn(201, senzing_package))
-
-    # FIXME:  Temporary work-around
-
-    fix_source = "downloads/G2Database.py"
-    if os.path.exists(fix_source):
-        fix_destination = "{0}/python/G2Database.py".format(senzing_g2_dir)
-        fix_destination_backup = "{0}.{1}".format(fix_destination, int(time.time()))
-        shutil.move(fix_destination, fix_destination_backup)
-        shutil.copyfile(fix_source, fix_destination)
-
-    # Delete sentinal files.
-
+    delete_files(config)
     delete_sentinal_files(config)
-
-    # Determine ownership of senzing_dir.
-
-    stat_info = os.stat(senzing_dir)
-    user_id = stat_info.st_uid
-    group_id = stat_info.st_gid
-
-    # Adjust file ownership.
-
-    for dirpath, dirnames, filenames in os.walk(senzing_dir):
-        for dname in dirnames:
-            os.chown(os.path.join(dirpath, dname), user_id, group_id)
-        for fname in filenames:
-            os.chown(os.path.join(dirpath, fname), user_id, group_id)
+    install_files(config)
+    file_ownership(config)
 
     # Epilog.
 
