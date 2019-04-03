@@ -151,6 +151,23 @@ The following software programs need to be installed:
 1. Visit [Downloading Senzing_API.tgz](https://github.com/Senzing/knowledge-base/blob/master/HOWTO/create-senzing-dir.md#downloading-senzing_apitgz)
 1. Download `Senzing_API.tgz` to ${GIT_REPOSITORY_DIR}/[downloads](./downloads) directory.
 
+#### Download ibm_data_server_driver_for_odbc_cli_linuxx64_v11.1.tar.gz
+
+1. Visit [Download initial Version 11.1 clients and drivers](http://www-01.ibm.com/support/docview.wss?uid=swg21385217)
+    1. Click on "[IBM Data Server Driver for ODBC and CLI (CLI Driver)](http://www.ibm.com/services/forms/preLogin.do?source=swg-idsoc97)" link.
+    1. Select :radio_button:  "IBM Data Server Driver for ODBC and CLI (Linux AMD64 and Intel EM64T)"
+    1. Click "Continue" button.
+    1. Choose download method and click "Download now" button.
+    1. Download `ibm_data_server_driver_for_odbc_cli_linuxx64_v11.1.tar.gz` to ${GIT_REPOSITORY_DIR}/[downloads](./downloads) directory.
+
+#### Download v11.1.4fp4a_jdbc_sqlj.tar.gz
+
+1. Visit [DB2 JDBC Driver Versions and Downloads](http://www-01.ibm.com/support/docview.wss?uid=swg21363866)
+    1. In DB2 Version 11.1 > JDBC 3.0 Driver version, click on "3.72.52" link.
+    1. Click on "DSClients--jdbc_sqlj-11.1.4.4-FP004a" link.
+    1. Click on "v11.1.4fp4a_jdbc_sqlj.tar.gz" link to download.
+    1. Download `v11.1.4fp4a_jdbc_sqlj.tar.gz` to ${GIT_REPOSITORY_DIR}/[downloads](./downloads) directory.
+
 ### Build docker image for development
 
 1. Variation #1 - Using `make` command.
