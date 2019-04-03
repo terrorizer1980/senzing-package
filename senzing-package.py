@@ -20,7 +20,7 @@ import zipfile
 __all__ = []
 __version__ = "1.0.0"  # See https://www.python.org/dev/peps/pep-0396/
 __date__ = '2019-03-27'
-__updated__ = '2019-04-02'
+__updated__ = '2019-04-03'
 
 SENZING_PRODUCT_ID = "5003"  # See https://github.com/Senzing/knowledge-base/blob/master/lists/senzing-product-ids.md
 log_format = '%(asctime)s %(message)s'
@@ -51,7 +51,7 @@ configuration_locator = {
         "cli": "senzing-package"
     },
     "sleep_time": {
-        "default": 600,
+        "default": 3600,
         "env": "SENZING_SLEEP_TIME",
         "cli": "sleep-time"
     },
@@ -74,7 +74,7 @@ def get_parser():
     subparser_1 = subparsers.add_parser('version', help='Print the version of senzing-package.py.')
 
     subparser_2 = subparsers.add_parser('sleep', help='Do nothing but sleep. For Docker testing.')
-    subparser_2.add_argument("--sleep-time", dest="sleep_time", metavar="SENZING_SLEEP_TIME", help="Sleep time in seconds. DEFAULT: 600")
+    subparser_2.add_argument("--sleep-time", dest="sleep_time", metavar="SENZING_SLEEP_TIME", help="Sleep time in seconds. DEFAULT: 3600 (1 hour)")
 
     subparser_3 = subparsers.add_parser('current-version', help='Show the version of the currently installed Senzing package.')
     subparser_3.add_argument("--senzing-dir", dest="senzing_dir", metavar="SENZING_DIR", help="Senzing directory.  DEFAULT: /opt/senzing")
@@ -283,6 +283,7 @@ def validate_configuration(config):
 
 
 def archive_path(source, current_version):
+    '''Move source to a backup path.'''
 
     # Construct backup name.
 
@@ -301,7 +302,10 @@ def archive_path(source, current_version):
 
 
 def archive_paths(config):
-    # Note: Can't just archive senzing_dir (/opt/senzing) because it may be an attached volume in a docker image.
+    '''Archive all paths by moving to a new pathname.
+       Note: Can't just archive senzing_dir (/opt/senzing)
+       because it may be an attached volume in a docker image.
+    '''
 
     # Pull values from configuration.
 
@@ -327,6 +331,7 @@ def archive_paths(config):
 
 
 def install_tgz(config, manifest):
+    '''Extract a TGZ file.'''
     source = manifest.get("source")
     target = manifest.get("target")
     try:
@@ -338,23 +343,21 @@ def install_tgz(config, manifest):
 
 
 def install_file(config, manifest):
-
+    '''Install single file.  But first, backup original file.'''
     source = manifest.get("source")
     target = manifest.get("target")
-
     target_backup = "{0}.{1}".format(target, int(time.time()))
-
     try:
         shutil.move(target, target_backup)
         logging.info(message_info(107, target, target_backup))
-
         shutil.copyfile(source, target)
-        logging.info(message_warn(111, source, target))
+        logging.info(message_info(111, source, target))
     except:
         logging.info(message_warn(204, source, target))
 
 
 def install_zip(config, manifest):
+    '''Extract a ZIP file.'''
     source = manifest.get("source")
     target = manifest.get("target")
     try:
@@ -366,6 +369,7 @@ def install_zip(config, manifest):
 
 
 def install_files(config):
+    '''Install all files based on what is in the 'downloads' directory.'''
 
     senzing_dir = config.get('senzing_dir')
     manifests = [
@@ -391,6 +395,8 @@ def install_files(config):
             'function': install_file
         }
     ]
+
+    # Tricky code. The function called is specified in the manifest.
 
     for manifest in manifests:
         source = manifest.get("source")
@@ -420,7 +426,7 @@ def install_files(config):
 
 
 def delete_files(config):
-    
+    '''Delete all files by removing directories trees.'''
     senzing_dir = config.get('senzing_dir')
     current_version = get_current_version(config)
     directories = [
@@ -428,8 +434,7 @@ def delete_files(config):
         "{0}/db2".format(senzing_dir)
     ]
 
-    # Archive an existing directory.
-    # Note: Can't just archive senzing_dir because it may be an attached volume in a docker image.
+    # Remove directories.
 
     for directory in directories:
         if os.path.exists(directory):
@@ -439,7 +444,7 @@ def delete_files(config):
 
 
 def delete_empty_directories(path):
-
+    '''Remove empty directories recursively.'''
     for dirpath, dirnames, filenames in os.walk(path, topdown=False):
         for dname in dirnames:
             directory = os.path.join(dirpath, dname)
@@ -448,8 +453,8 @@ def delete_empty_directories(path):
 
 
 def get_approved_ibm_files(config):
+    '''Get the list of IBM DB2 approved files.'''
     senzing_dir = config.get('senzing_dir')
-
     return [
         "{0}/db2/clidriver/adm/db2trc".format(senzing_dir),
         "{0}/db2/clidriver/bin/db2dsdcfgfill".format(senzing_dir),
@@ -507,12 +512,13 @@ def create_signal_handler_function(args):
 
 
 def delete_sentinal_files(config):
-
+    '''Delete the sentinal file used to signal that processing was done.'''
     senzing_dir = config.get('senzing_dir')
-
     files = [
         "{0}/docker-runs.sentinel".format(senzing_dir)
     ]
+
+    # Delete files.
 
     for file in files:
         try:
@@ -557,7 +563,7 @@ def exit_silently():
 
 
 def file_ownership(config):
-
+    '''Modify file ownership (i.e. chown).'''
     senzing_dir = config.get('senzing_dir')
 
     # Determine ownership of senzing_dir.
@@ -576,9 +582,8 @@ def file_ownership(config):
 
 
 def get_current_version(config):
-
+    '''Get version of Senzing seen in senzing_dir.'''
     result = None
-
     senzing_dir = config.get('senzing_dir')
     version_file = "{0}/g2/data/g2BuildVersion.json".format(senzing_dir)
 
@@ -596,11 +601,8 @@ def get_current_version(config):
 
 
 def common_prolog(config):
-
+    '''Common steps for most do_* functions.'''
     validate_configuration(config)
-
-    # Prolog.
-
     logging.info(entry_template(config))
 
 # -----------------------------------------------------------------------------
@@ -651,7 +653,7 @@ def do_delete(args):
 
 
 def do_install(args):
-    '''Install Senzing_API.tgz package.'''
+    '''Install Senzing_API.tgz package. Backup existing version.'''
 
     # Get context from CLI, environment variables, and ini files.
 
@@ -709,7 +711,7 @@ def do_package_version(args):
 
 
 def do_replace(args):
-    '''Install Senzing_API.tgz package.'''
+    '''Install Senzing_API.tgz package. Do not backup existing version.'''
 
     # Get context from CLI, environment variables, and ini files.
 
@@ -732,7 +734,7 @@ def do_replace(args):
 
 
 def do_sleep(args):
-    '''Sleep.'''
+    '''Sleep.  Used for debugging.'''
 
     # Get context from CLI, environment variables, and ini files.
 

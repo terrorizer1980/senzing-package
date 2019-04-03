@@ -65,8 +65,16 @@ See [Develop](#develop).
 
 ### Configuration
 
-- **SENZING_SUBCOMMAND** -
-  Identify the subcommand to be run. See `stream-loader.py --help` for complete list.
+* **SENZING_DEBUG** -
+  Enable debug information. Values: 0=no debug; 1=debug. Default: 0.
+* **SENZING_DIR** -
+  Location of Senzing libraries. Default: "/opt/senzing".  
+* **SENZING_PACKAGE** -
+  Full path name to Senzing_API.tgz.  Example: `/tmp/Senzing_API.tgz`.  
+* **SENZING_SLEEP_TIME** -
+  Number of seconds to sleep when using `sleep` subcommand.  Usually used for debugging.  Default: 6600 (1 hour).
+* **SENZING_SUBCOMMAND** -
+  Identify the subcommand to be run. See `senzing-package.py --help` for complete list.
   
 1. To determine which configuration parameters are use for each `<subcommand>`, run:
 
