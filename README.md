@@ -171,7 +171,7 @@ The following software programs need to be installed:
 #### Download v11.1.4fp4a_jdbc_sqlj.tar.gz
 
 1. Visit [DB2 JDBC Driver Versions and Downloads](http://www-01.ibm.com/support/docview.wss?uid=swg21363866)
-    1. In DB2 Version 11.1 > JDBC 3.0 Driver version, click on "3.72.52" link.
+    1. In DB2 Version 11.1 > JDBC 3.0 Driver version, click on "3.72.52" link for "v11.1 M4 FP4 iFix1"
     1. Click on "DSClients--jdbc_sqlj-11.1.4.4-FP004a" link.
     1. Click on "v11.1.4fp4a_jdbc_sqlj.tar.gz" link to download.
     1. Download `v11.1.4fp4a_jdbc_sqlj.tar.gz` to ${GIT_REPOSITORY_DIR}/[downloads](./downloads) directory.
