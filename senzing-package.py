@@ -20,7 +20,7 @@ import zipfile
 __all__ = []
 __version__ = "1.0.0"  # See https://www.python.org/dev/peps/pep-0396/
 __date__ = '2019-03-27'
-__updated__ = '2019-04-03'
+__updated__ = '2019-04-12'
 
 SENZING_PRODUCT_ID = "5003"  # See https://github.com/Senzing/knowledge-base/blob/master/lists/senzing-product-ids.md
 log_format = '%(asctime)s %(message)s'
@@ -307,23 +307,16 @@ def archive_paths(config):
        because it may be an attached volume in a docker image.
     '''
 
-    # Pull values from configuration.
-
-    senzing_dir = config.get('senzing_dir')
-
     # Synthesize variables.
 
     current_version = get_current_version(config)
-    paths = [
-        "{0}/g2".format(senzing_dir),
-        "{0}/db2".format(senzing_dir),
-    ]
+    senzing_directories = get_senzing_directories(config)
 
     # Archive paths.
 
-    for path in paths:
-        if os.path.exists(path):
-            archive_path(path, current_version)
+    for senzing_directory in senzing_directories:
+        if os.path.exists(senzing_directory):
+            archive_path(senzing_directory, current_version)
 
 # -----------------------------------------------------------------------------
 # Install functions
@@ -435,20 +428,16 @@ def install_files(config):
 
 def delete_files(config):
     '''Delete all files by removing directories trees.'''
-    senzing_dir = config.get('senzing_dir')
     current_version = get_current_version(config)
-    directories = [
-        "{0}/g2".format(senzing_dir),
-        "{0}/db2".format(senzing_dir)
-    ]
+    senzing_directories = get_senzing_directories(config)
 
     # Remove directories.
 
-    for directory in directories:
-        if os.path.exists(directory):
-            logging.info(message_info(109, directory, current_version))
-            shutil.rmtree(directory)
-            logging.info(message_info(110, directory))
+    for senzing_directory in senzing_directories:
+        if os.path.exists(senzing_directory):
+            logging.info(message_info(109, senzing_directory, current_version))
+            shutil.rmtree(senzing_directory)
+            logging.info(message_info(110, senzing_directory))
 
 
 def delete_empty_directories(path):
@@ -582,11 +571,19 @@ def file_ownership(config):
 
     # Adjust file ownership.
 
-    for dirpath, dirnames, filenames in os.walk(senzing_dir):
-        for dname in dirnames:
-            os.chown(os.path.join(dirpath, dname), user_id, group_id)
-        for fname in filenames:
-            os.chown(os.path.join(dirpath, fname), user_id, group_id)
+    senzing_directories = get_senzing_directories(config)
+    for senzing_directory in senzing_directories:
+        for dirpath, dirnames, filenames in os.walk(senzing_directory):
+            for dname in dirnames:
+                try:
+                    os.chown(os.path.join(dirpath, dname), user_id, group_id)
+                except:
+                    continue
+            for fname in filenames:
+                try:
+                    os.chown(os.path.join(dirpath, fname), user_id, group_id)
+                except:
+                    continue
 
 
 def get_current_version(config):
@@ -606,6 +603,15 @@ def get_current_version(config):
         logging.info(message_warn(201, version_file))
 
     return result
+
+
+def get_senzing_directories(config):
+    '''Get directories within /opt/senzing.'''
+    senzing_dir = config.get('senzing_dir')
+    return [
+        "{0}/g2".format(senzing_dir),
+        "{0}/db2".format(senzing_dir)
+    ]
 
 
 def common_prolog(config):
