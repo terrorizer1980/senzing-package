@@ -20,7 +20,7 @@ import zipfile
 __all__ = []
 __version__ = "1.0.0"  # See https://www.python.org/dev/peps/pep-0396/
 __date__ = '2019-03-27'
-__updated__ = '2019-04-12'
+__updated__ = '2019-04-15'
 
 SENZING_PRODUCT_ID = "5003"  # See https://github.com/Senzing/knowledge-base/blob/master/lists/senzing-product-ids.md
 log_format = '%(asctime)s %(message)s'
@@ -39,6 +39,11 @@ configuration_locator = {
         "default": False,
         "env": "SENZING_DEBUG",
         "cli": "debug"
+    },
+    "full_db2_client": {
+        "default": False,
+        "env": "SENZING_FULL_DB2_CLIENT",
+        "cli": "full-db2-client"
     },
     "senzing_dir": {
         "default": "/opt/senzing",
@@ -87,6 +92,7 @@ def get_parser():
     subparser_5 = subparsers.add_parser('install', help='Backup existing directory and install to a clean directory.')
     subparser_5.add_argument("--senzing-dir", dest="senzing_dir", metavar="SENZING_DIR", help="Senzing directory.  DEFAULT: /opt/senzing")
     subparser_5.add_argument("--senzing-package", dest="senzing_package", metavar="SENZING_PACKAGE", help="Path to Senzing package.  DEFAULT: downloads/Senzing_API.tgz")
+    subparser_5.add_argument("--full-db2-client", dest="full_db2_client", action="store_true", help="Include entire DB2 client. (SENZING_FULL_DB2_CLIENT) Default: False")
     subparser_5.add_argument("--debug", dest="debug", action="store_true", help="Enable debugging. (SENZING_DEBUG) Default: False")
 
     subparser_6 = subparsers.add_parser('delete', help='Delete existing directory.')
@@ -96,6 +102,7 @@ def get_parser():
     subparser_7 = subparsers.add_parser('replace', help='Delete existing directory and install to a clean directory.')
     subparser_7.add_argument("--senzing-dir", dest="senzing_dir", metavar="SENZING_DIR", help="Senzing directory.  DEFAULT: /opt/senzing")
     subparser_7.add_argument("--senzing-package", dest="senzing_package", metavar="SENZING_PACKAGE", help="Path to Senzing package.  DEFAULT: downloads/Senzing_API.tgz")
+    subparser_7.add_argument("--full-db2-client", dest="full_db2_client", action="store_true", help="Include entire DB2 client. (SENZING_FULL_DB2_CLIENT) Default: False")
     subparser_7.add_argument("--debug", dest="debug", action="store_true", help="Enable debugging. (SENZING_DEBUG) Default: False")
 
     return parser
@@ -398,24 +405,26 @@ def install_files(config):
 
     # Remove all non-approved files.
 
-    approved_ibm_files = get_approved_ibm_files(config)
-    directories = [
-        "{0}/db2".format(senzing_dir)
-    ]
-    for directory in directories:
-        for dirpath, dirnames, filenames in os.walk(directory):
-            for fname in filenames:
-                filename = os.path.join(dirpath, fname)
-                if not filename in approved_ibm_files:
-                    os.remove(filename)
+    full_db2_client = config.get('full_db2_client')
+    if not full_db2_client:
+        approved_ibm_files = get_approved_ibm_files(config)
+        directories = [
+            "{0}/db2".format(senzing_dir)
+        ]
+        for directory in directories:
+            for dirpath, dirnames, filenames in os.walk(directory):
+                for fname in filenames:
+                    filename = os.path.join(dirpath, fname)
+                    if not filename in approved_ibm_files:
+                        os.remove(filename)
 
-    # FIXME: Work-around for lack of IBM crypto support.
-
-    touch_files = [
-        "{0}/db2/clidriver/bin/crypto_not_installed".format(senzing_dir)
-    ]
-    for touch_file in touch_files:
-        touch(touch_file)
+        # FIXME: Work-around for lack of IBM crypto support.
+    
+        touch_files = [
+            "{0}/db2/clidriver/bin/crypto_not_installed".format(senzing_dir)
+        ]
+        for touch_file in touch_files:
+            touch(touch_file)
 
     # Remove all empty directories.
 
