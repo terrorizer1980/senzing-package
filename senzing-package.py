@@ -20,7 +20,7 @@ import zipfile
 __all__ = []
 __version__ = "1.0.0"  # See https://www.python.org/dev/peps/pep-0396/
 __date__ = '2019-03-27'
-__updated__ = '2019-04-15'
+__updated__ = '2019-04-30'
 
 SENZING_PRODUCT_ID = "5003"  # See https://github.com/Senzing/knowledge-base/blob/master/lists/senzing-product-ids.md
 log_format = '%(asctime)s %(message)s'
@@ -131,6 +131,7 @@ message_dictionary = {
     "109": "Deleting {0} at version {1}.",
     "110": "{0} deleted.",
     "111": "{0} copied to {1}.",
+    "112": "{0} was not in the docker image.",    
     "198": "For information on warnings and errors, see https://github.com/Senzing/stream-loader#errors",
     "199": "{0}",
     "200": "senzing-" + SENZING_PRODUCT_ID + "{0:04d}W",
@@ -402,6 +403,8 @@ def install_files(config):
         source = manifest.get("source")
         if os.path.exists(source):
             manifest.get("function")(config, manifest)
+        else:
+            logging.info(message_info(112, source))
 
     # Remove all non-approved files.
 

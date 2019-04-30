@@ -40,16 +40,17 @@ optional arguments:
     1. [Install](#install)
     1. [Demonstrate](#demonstrate)
 1. [Using Docker](#using-docker)
+    1. [Expectations](#expectations)
     1. [Build docker image](#build-docker-image)
     1. [Configuration](#configuration)
-    1. [Run docker image](#run-docker-image)
+    1. [Run docker container](#run-docker-container)
 1. [Develop](#develop)
     1. [Prerequisite software](#prerequisite-software)
     1. [Clone repository](#clone-repository)
     1. [Downloads](#downloads)
     1. [Build docker image for development](#build-docker-image-for-development)
 1. [Examples](#examples)
-1. [Errors](errors)
+1. [Errors](#errors)
 
 ## Using Command Line
 
@@ -58,6 +59,22 @@ optional arguments:
 ### Demonstrate
 
 ## Using Docker
+
+### Expectations
+
+#### Space
+
+This repository and demonstration require 6 GB free disk space.
+
+#### Time
+
+Budget 40 minutes to get the demonstration up-and-running, depending on CPU and network speeds.
+
+#### Background knowledge
+
+This repository assumes a working knowledge of:
+
+1. [Docker](https://github.com/Senzing/knowledge-base/blob/master/WHATIS/docker.md)
 
 ### Build docker image
 
@@ -82,16 +99,20 @@ See [Develop](#develop).
     ./senzing-package.py <subcommand> --help
     ```
 
-### Run docker image
+### Run docker container
 
 #### Demonstrate stand-alone
 
-1. Run the docker container. Example:
+1. :pencil2: Set environment variables.  Example:
 
     ```console
     export SENZING_SUBCOMMAND=install
     export SENZING_DIR=/opt/senzing
+    ```
 
+1. Run the docker container.  Example:
+
+    ```console
     sudo docker run \
       --env SENZING_SUBCOMMAND="${SENZING_SUBCOMMAND}" \
       --rm \
@@ -101,21 +122,25 @@ See [Develop](#develop).
 
 #### Demonstrate in docker-compose
 
-1. Determine docker network:
+1. :pencil2: Determine docker network.  Example:
 
     ```console
-    docker network ls
+    sudo docker network ls
 
     # Choose value from NAME column of docker network ls
     export SENZING_NETWORK=nameofthe_network
     ```
 
-1. Run the docker container. Example:
+1. :pencil2: Set environment variables.  Example:
 
     ```console
     export SENZING_SUBCOMMAND=install
     export SENZING_DIR=/opt/senzing
+    ```
 
+1. Run the docker container.  Example:
+
+    ```console
     sudo docker run \
       --env SENZING_SUBCOMMAND="${SENZING_SUBCOMMAND}" \
       --net ${SENZING_NETWORK} \
@@ -143,7 +168,7 @@ The following software programs need to be installed:
     export GIT_REPOSITORY=senzing-package
     ```
 
-   Then follow steps in [clone-repository](https://github.com/Senzing/knowledge-base/blob/master/HOWTO/clone-repository.md).
+1. Follow steps in [clone-repository](https://github.com/Senzing/knowledge-base/blob/master/HOWTO/clone-repository.md) to install the Git repository.
 
 1. After the repository has been cloned, be sure the following are set:
 
@@ -178,7 +203,14 @@ The following software programs need to be installed:
 
 ### Build docker image for development
 
-1. Variation #1 - Using `make` command.
+1. Option #1 - Using docker command and local repository.
+
+    ```console
+    cd ${GIT_REPOSITORY_DIR}
+    sudo docker build --tag senzing/senzing-package .
+    ```
+
+1. Option #2 - Using make command.
 
     ```console
     cd ${GIT_REPOSITORY_DIR}
@@ -186,15 +218,6 @@ The following software programs need to be installed:
     ```
 
     Note: `sudo make docker-build-base` can be used to create cached docker layers.
-
-1. Variation #2 - Using `docker` command.
-
-    ```console
-    export DOCKER_IMAGE_NAME=senzing/senzing-package
-
-    cd ${GIT_REPOSITORY_DIR}
-    sudo docker build --tag ${DOCKER_IMAGE_NAME} .
-    ```
 
 ## Examples
 
