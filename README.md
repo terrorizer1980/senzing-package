@@ -34,6 +34,12 @@ optional arguments:
   -h, --help            show this help message and exit
 ```
 
+To see the options for a subcommand, run commands like:
+
+```console
+./senzing-package.py install --help
+```
+
 ### Contents
 
 1. [Using Command Line](#using-command-line)
@@ -85,14 +91,19 @@ See [Develop](#develop).
 * **SENZING_DEBUG** -
   Enable debug information. Values: 0=no debug; 1=debug. Default: 0.
 * **SENZING_DIR** -
-  Location of Senzing libraries. Default: "/opt/senzing".  
+  Path on the local system where
+  [Senzing_API.tgz](https://s3.amazonaws.com/public-read-access/SenzingComDownloads/Senzing_API.tgz)
+  has been extracted.
+  See [Create SENZING_DIR](#create-senzing_dir).
+  No default.
+  Usually set to "/opt/senzing".
 * **SENZING_PACKAGE** -
   Full path name to Senzing_API.tgz.  Example: `/tmp/Senzing_API.tgz`.  
 * **SENZING_SLEEP_TIME** -
   Number of seconds to sleep when using `sleep` subcommand.  Usually used for debugging.  Default: 6600 (1 hour).
 * **SENZING_SUBCOMMAND** -
   Identify the subcommand to be run. See `senzing-package.py --help` for complete list.
-  
+
 1. To determine which configuration parameters are use for each `<subcommand>`, run:
 
     ```console
