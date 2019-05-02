@@ -568,7 +568,7 @@ def exit_error(index, *args):
 
 def exit_silently():
     '''Exit program.'''
-    sys.exit(1)
+    sys.exit(0)
 
 
 def file_ownership(config):
