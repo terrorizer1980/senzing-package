@@ -56,7 +56,7 @@ configuration_locator = {
         "cli": "senzing-package"
     },
     "sleep_time": {
-        "default": 3600,
+        "default": 0,
         "env": "SENZING_SLEEP_TIME",
         "cli": "sleep-time"
     },
@@ -79,7 +79,7 @@ def get_parser():
     subparser_1 = subparsers.add_parser('version', help='Print the version of senzing-package.py.')
 
     subparser_2 = subparsers.add_parser('sleep', help='Do nothing but sleep. For Docker testing.')
-    subparser_2.add_argument("--sleep-time", dest="sleep_time", metavar="SENZING_SLEEP_TIME", help="Sleep time in seconds. DEFAULT: 3600 (1 hour)")
+    subparser_2.add_argument("--sleep-time", dest="sleep_time", metavar="SENZING_SLEEP_TIME", help="Sleep time in seconds. DEFAULT: 0 (infinite)")
 
     subparser_3 = subparsers.add_parser('current-version', help='Show the version of the currently installed Senzing package.')
     subparser_3.add_argument("--senzing-dir", dest="senzing_dir", metavar="SENZING_DIR", help="Senzing directory.  DEFAULT: /opt/senzing")
