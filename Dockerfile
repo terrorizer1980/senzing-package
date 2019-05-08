@@ -27,5 +27,4 @@ COPY ./downloads/ /app/downloads/
 ENV SENZING_DOCKER_LAUNCHED=true
 
 WORKDIR /app
-ENTRYPOINT /app/senzing-package.py
-CMD [""]
+ENTRYPOINT ["/app/senzing-package.py"]
