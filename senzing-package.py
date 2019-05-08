@@ -20,7 +20,7 @@ import zipfile
 __all__ = []
 __version__ = "1.0.0"  # See https://www.python.org/dev/peps/pep-0396/
 __date__ = '2019-03-27'
-__updated__ = '2019-04-30'
+__updated__ = '2019-05-08'
 
 SENZING_PRODUCT_ID = "5003"  # See https://github.com/Senzing/knowledge-base/blob/master/lists/senzing-product-ids.md
 log_format = '%(asctime)s %(message)s'
@@ -105,6 +105,8 @@ def get_parser():
     subparser_7.add_argument("--full-db2-client", dest="full_db2_client", action="store_true", help="Include entire DB2 client. (SENZING_FULL_DB2_CLIENT) Default: False")
     subparser_7.add_argument("--debug", dest="debug", action="store_true", help="Enable debugging. (SENZING_DEBUG) Default: False")
 
+    subparser_10 = subparsers.add_parser('docker-acceptance-test', help='For Docker acceptance testing.')
+
     return parser
 
 # -----------------------------------------------------------------------------
@@ -131,7 +133,8 @@ message_dictionary = {
     "109": "Deleting {0} at version {1}.",
     "110": "{0} deleted.",
     "111": "{0} copied to {1}.",
-    "112": "{0} was not in the docker image.",    
+    "112": "{0} was not in the docker image.",
+    "131": "Sleeping infinitely.",
     "198": "For information on warnings and errors, see https://github.com/Senzing/stream-loader#errors",
     "199": "{0}",
     "200": "senzing-" + SENZING_PRODUCT_ID + "{0:04d}W",
@@ -277,7 +280,7 @@ def validate_configuration(config):
 
     # Log where to go for help.
 
-    if len(user_warning_messages) > 0 or len(user_error_messages) > 0 :
+    if len(user_warning_messages) > 0 or len(user_error_messages) > 0:
         logging.info(message_info(198))
 
     # If there are error messages, exit.
@@ -422,7 +425,7 @@ def install_files(config):
                         os.remove(filename)
 
         # FIXME: Work-around for lack of IBM crypto support.
-    
+
         touch_files = [
             "{0}/db2/clidriver/bin/crypto_not_installed".format(senzing_dir)
         ]
@@ -506,6 +509,10 @@ def get_approved_ibm_files(config):
 # -----------------------------------------------------------------------------
 # Utility functions
 # -----------------------------------------------------------------------------
+
+
+def bootstrap_signal_handler(signal, frame):
+    sys.exit(0)
 
 
 def create_signal_handler_function(args):
@@ -686,6 +693,22 @@ def do_delete(args):
     logging.info(exit_template(config))
 
 
+def do_docker_acceptance_test(args):
+    '''Sleep.'''
+
+    # Get context from CLI, environment variables, and ini files.
+
+    config = get_configuration(args)
+
+    # Prolog.
+
+    logging.info(entry_template(config))
+
+    # Epilog.
+
+    logging.info(exit_template(config))
+
+
 def do_install(args):
     '''Install Senzing_API.tgz package. Backup existing version.'''
 
@@ -784,8 +807,15 @@ def do_sleep(args):
 
     # Sleep
 
-    logging.info(message_info(104, sleep_time))
-    time.sleep(sleep_time)
+    if sleep_time > 0:
+        logging.info(message_info(104, sleep_time))
+        time.sleep(sleep_time)
+
+    else:
+        sleep_time = 3600
+        while True:
+            logging.info(message_info(131))
+            time.sleep(sleep_time)
 
     # Epilog.
 
@@ -820,6 +850,11 @@ if __name__ == "__main__":
     log_level = log_level_map.get(log_level_parameter, logging.INFO)
     logging.basicConfig(format=log_format, level=log_level)
 
+    # Trap signals temporarily until args are parsed.
+
+    signal.signal(signal.SIGTERM, bootstrap_signal_handler)
+    signal.signal(signal.SIGINT, bootstrap_signal_handler)
+
     # Parse the command line arguments.
 
     subcommand = os.getenv("SENZING_SUBCOMMAND", None)
@@ -831,12 +866,17 @@ if __name__ == "__main__":
         args = argparse.Namespace(subcommand=subcommand)
     else:
         parser.print_help()
+        if len(os.getenv("SENZING_DOCKER_LAUNCHED", "")):
+            subcommand = "sleep"
+            args = argparse.Namespace(subcommand=subcommand)
+            do_sleep(args)
         exit_silently()
 
     # Catch interrupts. Tricky code: Uses currying.
 
     signal_handler = create_signal_handler_function(args)
     signal.signal(signal.SIGINT, signal_handler)
+    signal.signal(signal.SIGTERM, signal_handler)
 
     # Transform subcommand from CLI parameter to function name string.
 
