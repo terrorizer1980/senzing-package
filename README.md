@@ -5,6 +5,10 @@
 The [senzing-package.py](senzing-package.py) python script manages installing `Senzing_API.tgz`.
 The `senzing/senzing-package` docker image is a wrapper for use in docker formations (e.g. docker-compose, kubernetes).
 
+The dockerized version, `store/senzing/senzing-package`, is at
+[hub.docker.com/_/senzing-package](https://hub.docker.com/_/senzing-package).
+For more information, scroll down to [Accept docker image](#accept-docker-image).
+
 To see all of the subcommands, run:
 
 ```console
@@ -83,6 +87,23 @@ Budget 40 minutes to get the demonstration up-and-running, depending on CPU and 
 This repository assumes a working knowledge of:
 
 1. [Docker](https://github.com/Senzing/knowledge-base/blob/master/WHATIS/docker.md)
+
+### Accept docker image
+
+The use of the [store/senzing/senzing-package](https://hub.docker.com/_/senzing-package)
+docker image requires acceptance of an End User License agreement (EULA).
+To accept the license:
+
+1. Visit [hub.docker.com/_/senzing-package](https://hub.docker.com/_/senzing-package).
+1. Login to DockerHub.
+1. On [hub.docker.com/_/senzing-package](https://hub.docker.com/_/senzing-package), click "Proceed to Checkout" button.
+1. Check boxes for agreeing and acknowledging
+1. Click "Get Content" button.
+1. Verify image can be pulled from "Docker Store".  Example:
+
+   ```console
+   sudo docker pull store/senzing/senzing-package:0.0.1
+   ```
 
 ### Build docker image
 
