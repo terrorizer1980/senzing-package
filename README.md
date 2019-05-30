@@ -10,25 +10,27 @@ To see all of the subcommands, run:
 ```console
 $ ./senzing-package.py --help
 usage: senzing-package.py [-h]
-                          {version,sleep,current-version,package-version,install,delete,replace}
+                          {install,replace,delete,current-version,package-version,version,sleep,docker-acceptance-test}
                           ...
 
 Senzing package management. For more information, see
 https://github.com/senzing/senzing-package
 
 positional arguments:
-  {version,sleep,current-version,package-version,install,delete,replace}
+  {install,replace,delete,current-version,package-version,version,sleep,docker-acceptance-test}
                         Subcommands (SENZING_SUBCOMMAND):
-    version             Print the version of senzing-package.py.
-    sleep               Do nothing but sleep. For Docker testing.
+    install             Backup existing directory and install to a clean
+                        directory.
+    replace             Delete existing directory and install to a clean
+                        directory.
+    delete              Delete existing directory.
     current-version     Show the version of the currently installed Senzing
                         package.
     package-version     Show the version of the Senzing_API.tgz package.
-    install             Backup existing directory and install to a clean
-                        directory.
-    delete              Delete existing directory.
-    replace             Delete existing directory and install to a clean
-                        directory.
+    version             Print the version of senzing-package.py.
+    sleep               Do nothing but sleep. For Docker testing.
+    docker-acceptance-test
+                        For Docker acceptance testing.
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -98,9 +100,9 @@ See [Develop](#develop).
   No default.
   Usually set to "/opt/senzing".
 * **SENZING_PACKAGE** -
-  Full path name to Senzing_API.tgz.  Example: `/tmp/Senzing_API.tgz`.  
+  Full path name to Senzing_API.tgz.  Example: `/tmp/Senzing_API.tgz`.
 * **SENZING_SLEEP_TIME** -
-  Number of seconds to sleep when using `sleep` subcommand.  Usually used for debugging.  Default: 6600 (1 hour).
+  Number of seconds to sleep when using `sleep` subcommand.  Usually used for debugging.  Default: 0 (infinite).
 * **SENZING_SUBCOMMAND** -
   Identify the subcommand to be run. See `senzing-package.py --help` for complete list.
 
