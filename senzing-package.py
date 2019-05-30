@@ -86,7 +86,7 @@ def get_parser():
     subparser_3.add_argument("--senzing-dir", dest="senzing_dir", metavar="SENZING_DIR", help="Senzing directory.  DEFAULT: /opt/senzing")
     subparser_3.add_argument("--debug", dest="debug", action="store_true", help="Enable debugging. (SENZING_DEBUG) Default: False")
 
-    subparser_4 = subparsers.add_parser('current-version', help='Show the version of the currently installed Senzing package.')
+    subparser_4 = subparsers.add_parser('installed-version', help='Show the version of the currently installed Senzing package.')
     subparser_4.add_argument("--senzing-dir", dest="senzing_dir", metavar="SENZING_DIR", help="Senzing directory.  DEFAULT: /opt/senzing")
     subparser_4.add_argument("--debug", dest="debug", action="store_true", help="Enable debugging. (SENZING_DEBUG) Default: False")
 
@@ -126,6 +126,7 @@ message_dictionary = {
     "103": "Version: {0}  Updated: {1}",
     "104": "Sleeping {0} seconds.",
     "105": "Sleeping infinitely.",
+    "106": "Exit via Signal.",
     "130": "Version {0} detected in {1}.",
     "131": "Version {0} detected in Senzing package '{1}'.",
     "132": "Archived {0} to {1}",
@@ -319,7 +320,7 @@ def create_signal_handler_function(config):
             "returnCode": 0,
             "messageId":  message(100, 102),
             "elapsedTime": stop_time - config.get('startTime', stop_time),
-            "message": "Exit via signal",
+            "message": message(106),
             "context": config,
         }
 
@@ -433,7 +434,7 @@ def file_ownership(config):
                     continue
 
 
-def get_current_version(config):
+def get_installed_version(config):
     '''Get version of Senzing seen in senzing_dir.'''
     result = None
     senzing_dir = config.get('senzing_dir')
@@ -465,14 +466,14 @@ def get_senzing_directories(config):
 # -----------------------------------------------------------------------------
 
 
-def archive_path(source, current_version):
+def archive_path(source, installed_version):
     '''Move source to a backup path.'''
 
     # Construct backup name.
 
     target = source
-    if current_version:
-        target = "{0}-{1}".format(target, current_version)
+    if installed_version:
+        target = "{0}-{1}".format(target, installed_version)
     target = "{0}.{1}".format(target, int(time.time()))
 
     # Move path.
@@ -492,14 +493,14 @@ def archive_paths(config):
 
     # Synthesize variables.
 
-    current_version = get_current_version(config)
+    installed_version = get_installed_version(config)
     senzing_directories = get_senzing_directories(config)
 
     # Archive paths.
 
     for senzing_directory in senzing_directories:
         if os.path.exists(senzing_directory):
-            archive_path(senzing_directory, current_version)
+            archive_path(senzing_directory, installed_version)
 
 # -----------------------------------------------------------------------------
 # Install functions
@@ -584,22 +585,22 @@ def install_files(config):
 
 def delete_files(config):
     '''Delete all files by removing directories trees.'''
-    current_version = get_current_version(config)
+    installed_version = get_installed_version(config)
     senzing_directories = get_senzing_directories(config)
     for senzing_directory in senzing_directories:
         if os.path.exists(senzing_directory):
-            logging.info(message_info(134, senzing_directory, current_version))
+            logging.info(message_info(134, senzing_directory, installed_version))
             shutil.rmtree(senzing_directory)
             logging.info(message_info(135, senzing_directory))
 
 # -----------------------------------------------------------------------------
 # do_* functions
-#   Common function signature: do_XXX(args)
+#   Common function signature: do_XXX(config)
 # -----------------------------------------------------------------------------
 
 
-def do_current_version(config):
-    '''Get current version of Senzing API.'''
+def do_installed_version(config):
+    '''Get installed version of Senzing API.'''
 
     # Prolog.
 
@@ -607,7 +608,7 @@ def do_current_version(config):
 
     # Perform action.
 
-    get_current_version(config)
+    get_installed_version(config)
 
     # Epilog.
 

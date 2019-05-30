@@ -10,21 +10,21 @@ To see all of the subcommands, run:
 ```console
 $ ./senzing-package.py --help
 usage: senzing-package.py [-h]
-                          {install,replace,delete,current-version,package-version,version,sleep,docker-acceptance-test}
+                          {install,replace,delete,installed-version,package-version,version,sleep,docker-acceptance-test}
                           ...
 
 Senzing package management. For more information, see
 https://github.com/senzing/senzing-package
 
 positional arguments:
-  {install,replace,delete,current-version,package-version,version,sleep,docker-acceptance-test}
+  {install,replace,delete,installed-version,package-version,version,sleep,docker-acceptance-test}
                         Subcommands (SENZING_SUBCOMMAND):
     install             Backup existing directory and install to a clean
                         directory.
     replace             Delete existing directory and install to a clean
                         directory.
     delete              Delete existing directory.
-    current-version     Show the version of the currently installed Senzing
+    installed-version   Show the version of the currently installed Senzing
                         package.
     package-version     Show the version of the Senzing_API.tgz package.
     version             Print the version of senzing-package.py.
