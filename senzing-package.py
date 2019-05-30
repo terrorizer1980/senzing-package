@@ -20,7 +20,7 @@ import zipfile
 __all__ = []
 __version__ = "1.0.0"  # See https://www.python.org/dev/peps/pep-0396/
 __date__ = '2019-03-27'
-__updated__ = '2019-05-08'
+__updated__ = '2019-05-29'
 
 SENZING_PRODUCT_ID = "5003"  # See https://github.com/Senzing/knowledge-base/blob/master/lists/senzing-product-ids.md
 log_format = '%(asctime)s %(message)s'
@@ -133,7 +133,7 @@ message_dictionary = {
     "109": "Deleting {0} at version {1}.",
     "110": "{0} deleted.",
     "111": "{0} copied to {1}.",
-    "112": "{0} was not in the docker image.",
+    "112": "{0} does not exist.",
     "131": "Sleeping infinitely.",
     "198": "For information on warnings and errors, see https://github.com/Senzing/stream-loader#errors",
     "199": "{0}",
@@ -334,6 +334,18 @@ def archive_paths(config):
 # -----------------------------------------------------------------------------
 
 
+def copy_directory(config, manifest):
+    '''Extract a TGZ file.'''
+    source = manifest.get("source")
+    target = manifest.get("target")
+
+    try:
+        shutil.copytree(source, target, symlinks=True)
+        logging.info(message_info(111, source, target))
+    except:
+        logging.info(message_warn(204, source, target))
+
+
 def install_tgz(config, manifest):
     '''Extract a TGZ file.'''
     source = manifest.get("source")
@@ -382,21 +394,9 @@ def install_files(config):
             'target': senzing_dir,
             'function': install_tgz
         }, {
-            'source': "downloads/ibm_data_server_driver_for_odbc_cli_linuxx64_v11.1.tar.gz",
+            'source': "/opt/IBM/db2",
             'target': "{0}/db2".format(senzing_dir),
-            'function': install_tgz
-        }, {
-            'source': "downloads/v11.1.4fp4a_jdbc_sqlj.tar.gz",
-            'target': "{0}/db2/jdbc".format(senzing_dir),
-            'function': install_tgz
-        }, {
-            'source': "{0}/db2/jdbc/jdbc_sqlj/db2_db2driver_for_jdbc_sqlj.zip".format(senzing_dir),
-            'target': "{0}/db2/jdbc".format(senzing_dir),
-            'function': install_zip
-        }, {
-            'source': "downloads/G2Database.py",
-            'target': "{0}/g2/python/G2Database.py".format(senzing_dir),
-            'function': install_file
+            'function': copy_directory
         }
     ]
 
@@ -409,102 +409,16 @@ def install_files(config):
         else:
             logging.info(message_info(112, source))
 
-    # Remove all non-approved files.
-
-    full_db2_client = config.get('full_db2_client')
-    if not full_db2_client:
-        approved_ibm_files = get_approved_ibm_files(config)
-        directories = [
-            "{0}/db2".format(senzing_dir)
-        ]
-        for directory in directories:
-            for dirpath, dirnames, filenames in os.walk(directory):
-                for fname in filenames:
-                    filename = os.path.join(dirpath, fname)
-                    if not filename in approved_ibm_files:
-                        os.remove(filename)
-
-        # FIXME: Work-around for lack of IBM crypto support.
-
-        touch_files = [
-            "{0}/db2/clidriver/bin/crypto_not_installed".format(senzing_dir)
-        ]
-        for touch_file in touch_files:
-            touch(touch_file)
-
-    # Remove all empty directories.
-
-    directories = [
-        "{0}/db2".format(senzing_dir)
-    ]
-    for directory in directories:
-        delete_empty_directories(directory)
-
 
 def delete_files(config):
     '''Delete all files by removing directories trees.'''
     current_version = get_current_version(config)
     senzing_directories = get_senzing_directories(config)
-
-    # Remove directories.
-
     for senzing_directory in senzing_directories:
         if os.path.exists(senzing_directory):
             logging.info(message_info(109, senzing_directory, current_version))
             shutil.rmtree(senzing_directory)
             logging.info(message_info(110, senzing_directory))
-
-
-def delete_empty_directories(path):
-    '''Remove empty directories recursively.'''
-    for dirpath, dirnames, filenames in os.walk(path, topdown=False):
-        for dname in dirnames:
-            directory = os.path.join(dirpath, dname)
-            if not os.listdir(directory):
-                os.rmdir(directory)
-
-
-def get_approved_ibm_files(config):
-    '''Get the list of IBM DB2 approved files.'''
-    senzing_dir = config.get('senzing_dir')
-    return [
-        "{0}/db2/clidriver/adm/db2trc".format(senzing_dir),
-        "{0}/db2/clidriver/bin/db2dsdcfgfill".format(senzing_dir),
-        "{0}/db2/clidriver/bin/db2ldcfg".format(senzing_dir),
-        "{0}/db2/clidriver/bin/db2lddrg".format(senzing_dir),
-        "{0}/db2/clidriver/bin/db2level".format(senzing_dir),
-        "{0}/db2/clidriver/cfg/db2cli.ini.sample".format(senzing_dir),
-        "{0}/db2/clidriver/cfg/db2dsdriver.cfg.sample".format(senzing_dir),
-        "{0}/db2/clidriver/cfg/db2dsdriver.xsd".format(senzing_dir),
-        "{0}/db2/clidriver/conv/alt/08501252.cnv".format(senzing_dir),
-        "{0}/db2/clidriver/conv/alt/12520850.cnv".format(senzing_dir),
-        "{0}/db2/clidriver/conv/alt/IBM00850.ucs".format(senzing_dir),
-        "{0}/db2/clidriver/conv/alt/IBM01252.ucs".format(senzing_dir),
-        "{0}/db2/clidriver/include/sqlca.h".format(senzing_dir),
-        "{0}/db2/clidriver/include/sqlcli1.h".format(senzing_dir),
-        "{0}/db2/clidriver/include/sqlcli.h".format(senzing_dir),
-        "{0}/db2/clidriver/include/sql.h".format(senzing_dir),
-        "{0}/db2/clidriver/include/sqlsystm.h".format(senzing_dir),
-        "{0}/db2/clidriver/lib/libdb2o.so".format(senzing_dir),
-        "{0}/db2/clidriver/lib/libdb2o.so.1".format(senzing_dir),
-        "{0}/db2/clidriver/lib/libdb2.so".format(senzing_dir),
-        "{0}/db2/clidriver/lib/libdb2.so.1".format(senzing_dir),
-        "{0}/db2/clidriver/msg/en_US.iso88591/db2admh.mo".format(senzing_dir),
-        "{0}/db2/clidriver/msg/en_US.iso88591/db2adm.mo".format(senzing_dir),
-        "{0}/db2/clidriver/msg/en_US.iso88591/db2clia1.lst".format(senzing_dir),
-        "{0}/db2/clidriver/msg/en_US.iso88591/db2clias.lst".format(senzing_dir),
-        "{0}/db2/clidriver/msg/en_US.iso88591/db2clih.mo".format(senzing_dir),
-        "{0}/db2/clidriver/msg/en_US.iso88591/db2cli.mo".format(senzing_dir),
-        "{0}/db2/clidriver/msg/en_US.iso88591/db2clit.mo".format(senzing_dir),
-        "{0}/db2/clidriver/msg/en_US.iso88591/db2clp.mo".format(senzing_dir),
-        "{0}/db2/clidriver/msg/en_US.iso88591/db2diag.mo".format(senzing_dir),
-        "{0}/db2/clidriver/msg/en_US.iso88591/db2sqlh.mo".format(senzing_dir),
-        "{0}/db2/clidriver/msg/en_US.iso88591/db2sql.mo".format(senzing_dir),
-        "{0}/db2/jdbc/db2jcc4.jar".format(senzing_dir),
-        "{0}/db2/jdbc/db2jcc.jar".format(senzing_dir),
-        "{0}/db2/jdbc/sqlj4.zip".format(senzing_dir),
-        "{0}/db2/jdbc/sqlj.zip".format(senzing_dir),
-    ]
 
 # -----------------------------------------------------------------------------
 # Utility functions
@@ -637,14 +551,6 @@ def common_prolog(config):
     '''Common steps for most do_* functions.'''
     validate_configuration(config)
     logging.info(entry_template(config))
-
-
-def touch(path):
-    base_dir = os.path.dirname(path)
-    if not os.path.exists(base_dir):
-        os.makedirs(base_dir)
-    with open(path, 'a'):
-        os.utime(path, None)
 
 # -----------------------------------------------------------------------------
 # do_* functions
