@@ -96,12 +96,10 @@ See [Develop](#develop).
   Path on the local system where
   [Senzing_API.tgz](https://s3.amazonaws.com/public-read-access/SenzingComDownloads/Senzing_API.tgz)
   has been extracted.
-  See [Create SENZING_DIR](#create-senzing_dir).
-  No default.
-  Usually set to "/opt/senzing".
+  Default: `/opt/senzing`
 * **SENZING_PACKAGE** -
-  Full path name to Senzing_API.tgz.  Example: `/tmp/Senzing_API.tgz`.
-* **SENZING_SLEEP_TIME** -
+  Full path name to Senzing_API.tgz.  Default: `downloads/Senzing_API.tgz`.
+* **SENZING_SLEEP_TIME_IN_SECONDS** -
   Number of seconds to sleep when using `sleep` subcommand.  Usually used for debugging.  Default: 0 (infinite).
 * **SENZING_SUBCOMMAND** -
   Identify the subcommand to be run. See `senzing-package.py --help` for complete list.
