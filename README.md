@@ -5,30 +5,36 @@
 The [senzing-package.py](senzing-package.py) python script manages installing `Senzing_API.tgz`.
 The `senzing/senzing-package` docker image is a wrapper for use in docker formations (e.g. docker-compose, kubernetes).
 
+The dockerized version, `store/senzing/senzing-package`, is at
+[hub.docker.com/_/senzing-package](https://hub.docker.com/_/senzing-package).
+For more information, scroll down to [Accept docker image](#accept-docker-image).
+
 To see all of the subcommands, run:
 
 ```console
 $ ./senzing-package.py --help
 usage: senzing-package.py [-h]
-                          {version,sleep,current-version,package-version,install,delete,replace}
+                          {install,replace,delete,installed-version,package-version,version,sleep,docker-acceptance-test}
                           ...
 
 Senzing package management. For more information, see
 https://github.com/senzing/senzing-package
 
 positional arguments:
-  {version,sleep,current-version,package-version,install,delete,replace}
+  {install,replace,delete,installed-version,package-version,version,sleep,docker-acceptance-test}
                         Subcommands (SENZING_SUBCOMMAND):
-    version             Print the version of senzing-package.py.
-    sleep               Do nothing but sleep. For Docker testing.
-    current-version     Show the version of the currently installed Senzing
-                        package.
-    package-version     Show the version of the Senzing_API.tgz package.
     install             Backup existing directory and install to a clean
                         directory.
-    delete              Delete existing directory.
     replace             Delete existing directory and install to a clean
                         directory.
+    delete              Delete existing directory.
+    installed-version   Show the version of the currently installed Senzing
+                        package.
+    package-version     Show the version of the Senzing_API.tgz package.
+    version             Print the version of senzing-package.py.
+    sleep               Do nothing but sleep. For Docker testing.
+    docker-acceptance-test
+                        For Docker acceptance testing.
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -82,6 +88,23 @@ This repository assumes a working knowledge of:
 
 1. [Docker](https://github.com/Senzing/knowledge-base/blob/master/WHATIS/docker.md)
 
+### Accept docker image
+
+The use of the [store/senzing/senzing-package](https://hub.docker.com/_/senzing-package)
+docker image requires acceptance of an End User License agreement (EULA).
+To accept the license:
+
+1. Visit [hub.docker.com/_/senzing-package](https://hub.docker.com/_/senzing-package).
+1. Login to DockerHub.
+1. On [hub.docker.com/_/senzing-package](https://hub.docker.com/_/senzing-package), click "Proceed to Checkout" button.
+1. Check boxes for agreeing and acknowledging
+1. Click "Get Content" button.
+1. Verify image can be pulled from "Docker Store".  Example:
+
+   ```console
+   sudo docker pull store/senzing/senzing-package:0.0.1
+   ```
+
 ### Build docker image
 
 See [Develop](#develop).
@@ -94,13 +117,11 @@ See [Develop](#develop).
   Path on the local system where
   [Senzing_API.tgz](https://s3.amazonaws.com/public-read-access/SenzingComDownloads/Senzing_API.tgz)
   has been extracted.
-  See [Create SENZING_DIR](#create-senzing_dir).
-  No default.
-  Usually set to "/opt/senzing".
+  Default: `/opt/senzing`
 * **SENZING_PACKAGE** -
-  Full path name to Senzing_API.tgz.  Example: `/tmp/Senzing_API.tgz`.  
-* **SENZING_SLEEP_TIME** -
-  Number of seconds to sleep when using `sleep` subcommand.  Usually used for debugging.  Default: 6600 (1 hour).
+  Full path name to Senzing_API.tgz.  Default: `downloads/Senzing_API.tgz`.
+* **SENZING_SLEEP_TIME_IN_SECONDS** -
+  Number of seconds to sleep when using `sleep` subcommand.  Usually used for debugging.  Default: 0 (infinite).
 * **SENZING_SUBCOMMAND** -
   Identify the subcommand to be run. See `senzing-package.py --help` for complete list.
 
