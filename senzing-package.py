@@ -20,7 +20,7 @@ import zipfile
 __all__ = []
 __version__ = "1.0.0"  # See https://www.python.org/dev/peps/pep-0396/
 __date__ = '2019-03-27'
-__updated__ = '2019-05-30'
+__updated__ = '2019-06-05'
 
 SENZING_PRODUCT_ID = "5003"  # See https://github.com/Senzing/knowledge-base/blob/master/lists/senzing-product-ids.md
 log_format = '%(asctime)s %(message)s'
@@ -788,7 +788,7 @@ if __name__ == "__main__":
         if len(os.getenv("SENZING_DOCKER_LAUNCHED", "")):
             subcommand = "sleep"
             args = argparse.Namespace(subcommand=subcommand)
-            do_sleep(args)
+            do_sleep(get_configuration(args))
         exit_silently()
 
     # Get configuration
