@@ -20,7 +20,7 @@ import zipfile
 __all__ = []
 __version__ = "1.0.0"  # See https://www.python.org/dev/peps/pep-0396/
 __date__ = '2019-03-27'
-__updated__ = '2019-06-05'
+__updated__ = '2019-06-06'
 
 SENZING_PRODUCT_ID = "5003"  # See https://github.com/Senzing/knowledge-base/blob/master/lists/senzing-product-ids.md
 log_format = '%(asctime)s %(message)s'
@@ -390,11 +390,12 @@ def common_prolog(config):
     logging.info(entry_template(config))
 
 
-def delete_sentinal_files(config):
-    '''Delete the sentinal file used to signal that processing was done.'''
+def delete_sentinel_files(config):
+    '''Delete the sentinel file used to signal that processing was done.'''
     senzing_dir = config.get('senzing_dir')
     files = [
-        "{0}/docker-runs.sentinel".format(senzing_dir)
+        "{0}/docker-runs.sentinel".format(senzing_dir),
+        "{0}/mysql-init.sentinel".format(senzing_dir)
     ]
 
     # Delete files.
@@ -625,7 +626,7 @@ def do_delete(config):
     # Perform action.
 
     delete_files(config)
-    delete_sentinal_files(config)
+    delete_sentinel_files(config)
 
     # Epilog.
 
@@ -654,7 +655,7 @@ def do_install(config):
     # Perform action.
 
     archive_paths(config)
-    delete_sentinal_files(config)
+    delete_sentinel_files(config)
     install_files(config)
     file_ownership(config)
 
@@ -704,7 +705,7 @@ def do_replace(config):
     # Perform action.
 
     delete_files(config)
-    delete_sentinal_files(config)
+    delete_sentinel_files(config)
     install_files(config)
     file_ownership(config)
 
