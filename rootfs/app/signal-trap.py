@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 # -----------------------------------------------------------------------------
 # signal-trap.py  Test to see what signals are sent.
@@ -85,7 +85,7 @@ def handle_signal(signal, frame):
 
 if __name__ == "__main__":
 
-    for key, value in signals.items():
+    for key, value in list(signals.items()):
         try:
             signal.signal(key, handle_signal)
         except:
