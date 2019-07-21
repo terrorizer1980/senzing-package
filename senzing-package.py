@@ -1,4 +1,4 @@
-#! /usr/bin/env python
+#! /usr/bin/env python3
 
 # -----------------------------------------------------------------------------
 # senzing-package.py handles installation of the Senzing package.
@@ -20,7 +20,7 @@ import zipfile
 __all__ = []
 __version__ = "1.0.0"  # See https://www.python.org/dev/peps/pep-0396/
 __date__ = '2019-03-27'
-__updated__ = '2019-06-06'
+__updated__ = '2019-07-19'
 
 SENZING_PRODUCT_ID = "5003"  # See https://github.com/Senzing/knowledge-base/blob/master/lists/senzing-product-ids.md
 log_format = '%(asctime)s %(message)s'
@@ -205,19 +205,19 @@ def get_configuration(args):
 
     # Copy default values into configuration dictionary.
 
-    for key, value in configuration_locator.items():
+    for key, value in list(configuration_locator.items()):
         result[key] = value.get('default', None)
 
     # "Prime the pump" with command line args. This will be done again as the last step.
 
-    for key, value in args.__dict__.items():
+    for key, value in list(args.__dict__.items()):
         new_key = key.format(subcommand.replace('-', '_'))
         if value:
             result[new_key] = value
 
     # Copy OS environment variables into configuration dictionary.
 
-    for key, value in configuration_locator.items():
+    for key, value in list(configuration_locator.items()):
         os_env_var = value.get('env', None)
         if os_env_var:
             os_env_value = os.getenv(os_env_var, None)
@@ -226,7 +226,7 @@ def get_configuration(args):
 
     # Copy 'args' into configuration dictionary.
 
-    for key, value in args.__dict__.items():
+    for key, value in list(args.__dict__.items()):
         new_key = key.format(subcommand.replace('-', '_'))
         if value:
             result[new_key] = value
