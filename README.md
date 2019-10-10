@@ -46,6 +46,11 @@ To see the options for a subcommand, run commands like:
 ./senzing-package.py install --help
 ```
 
+### Related artifacts
+
+1. [DockerHub](https://hub.docker.com/_/senzing-package)
+1. [Helm Chart](https://github.com/Senzing/charts/tree/master/charts/senzing-package)
+
 ### Contents
 
 1. [Using Command Line](#using-command-line)
