@@ -492,7 +492,7 @@ def XX_get_installed_version(config):
             result = version_dictionary.get('VERSION')
             logging.info(message_info(130, result, version_file))
     except:
-        logging.info(message_warn(301, version_file))
+        logging.info(message_warning(301, version_file))
 
     return result
 
@@ -526,7 +526,7 @@ def XX_archive_path(source, installed_version):
         shutil.move(source, target)
         logging.info(message_info(132, source, target))
     except:
-        logging.info(message_warn(302, source, target))
+        logging.info(message_warning(302, source, target))
 
 
 def XX_archive_paths(config):
@@ -560,7 +560,7 @@ def copy_directory(config, manifest):
         shutil.copytree(source, target, symlinks=True)
         logging.info(message_info(136, source, target))
     except:
-        logging.info(message_warn(304, source, target))
+        logging.info(message_warning(304, source, target))
 
 
 def XX_install_tgz(config, manifest):
@@ -572,7 +572,7 @@ def XX_install_tgz(config, manifest):
             compressed_file.extractall(path=target)
             logging.info(message_info(133, source, target))
     except:
-        logging.info(message_warn(303, source, target))
+        logging.info(message_warning(303, source, target))
 
 
 def XX_install_file(config, manifest):
@@ -586,7 +586,7 @@ def XX_install_file(config, manifest):
         shutil.copyfile(source, target)
         logging.info(message_info(136, source, target))
     except:
-        logging.info(message_warn(304, source, target))
+        logging.info(message_warning(304, source, target))
 
 
 def XX_install_zip(config, manifest):
@@ -598,7 +598,7 @@ def XX_install_zip(config, manifest):
             compressed_file.extractall(target)
             logging.info(message_info(133, source, target))
     except:
-        logging.info(message_warn(303, source, target))
+        logging.info(message_warning(303, source, target))
 
 
 def XX_install_files(config):
@@ -678,21 +678,17 @@ def do_install(args):
 
     # Perform action.
 
-    source = "/opt/senzing-original/data/1.0.0"
-    target = "/opt/senzing/data"
     try:
-        shutil.copytree(source, target, symlinks=True)
-        logging.info(message_info(136, source, target))
+        shutil.copytree(source_data_dir, target_data_dir, symlinks=True)
+        logging.info(message_info(136, source_data_dir, target_data_dir))
     except:
-        logging.info(message_warn(304, source, target))
+        logging.info(message_warning(304, source_data_dir, target_data_dir))
 
-    source = "/opt/senzing-original/g2"
-    target = "/opt/senzing/g2"
     try:
-        shutil.copytree(source, target, symlinks=True)
-        logging.info(message_info(136, source, target))
+        shutil.copytree(source_g2_dir, target_g2_dir, symlinks=True)
+        logging.info(message_info(136, source_g2_dir, target_g2_dir))
     except:
-        logging.info(message_warn(304, source, target))
+        logging.info(message_warning(304, source_g2_dir, target_g2_dir))
 
     # Epilog.
 

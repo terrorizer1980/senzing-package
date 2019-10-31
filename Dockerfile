@@ -37,7 +37,7 @@ RUN apt -y install senzingdata-v1 senzingapi
 
 # Move files.
 
-RUN mv /opt/senzing     /opt/senzing-original
+RUN mv /opt/senzing /opt/senzing-source
 
 # Copy files from repository.
 
