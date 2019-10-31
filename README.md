@@ -54,7 +54,9 @@ To see the options for a subcommand, run commands like:
 1. [Demonstrate using Docker](#demonstrate-using-docker)
     1. [Accept docker image](#accept-docker-image)
     1. [Configuration](#configuration)
-    1. [Demonstrate using Docker](#demonstrate-using-docker)
+    1. [Docker network](#docker-network)
+    1. [Docker user](#docker-user)
+    1. [Run docker container](#run-docker-container)
 1. [Develop](#develop)
     1. [Prerequisite software](#prerequisite-software)
     1. [Clone repository](#clone-repository)
@@ -117,8 +119,6 @@ Configuration values specified by environment variable or command line parameter
     ./senzing-package.py <subcommand> --help
     ```
 
-### Demonstrate using Docker
-
 1. :pencil2: Set environment variables.  Example:
 
     ```console
@@ -127,7 +127,7 @@ Configuration values specified by environment variable or command line parameter
     export SENZING_G2_DIR=/opt/my-senzing/g2
     ```
 
-#### Docker network
+### Docker network
 
 :thinking: **Optional:**  Use if docker container is part of a docker network.
 
@@ -153,7 +153,7 @@ Configuration values specified by environment variable or command line parameter
     export SENZING_NETWORK_PARAMETER="--net ${SENZING_NETWORK}"
     ```
 
-#### Docker user
+### Docker user
 
 :thinking: **Optional:**  The docker container runs as "USER 1001".
 Use if a different userid (UID) is required.
@@ -180,7 +180,7 @@ Use if a different userid (UID) is required.
     export SENZING_RUNAS_USER_PARAMETER="--user ${SENZING_RUNAS_USER}"
     ```
 
-#### Run docker container
+### Run docker container
 
 1. Run docker container.
    Example:
@@ -227,7 +227,7 @@ see [Environment Variables](https://github.com/Senzing/knowledge-base/blob/maste
 1. **Option #1:** Using `docker` command and GitHub.
 
     ```console
-    sudo docker build --tag senzing/template https://github.com/senzing/senzing-package.git
+    sudo docker build --tag senzing/senzing-package https://github.com/senzing/senzing-package.git
     ```
 
 1. **Option #2:** Using `docker` command and local repository.
