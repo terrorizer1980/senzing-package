@@ -75,9 +75,7 @@ configuration_locator = {
 
 # Enumerate keys in 'configuration_locator' that should not be printed to the log.
 
-keys_to_redact = [
-    "password",
-    ]
+keys_to_redact = []
 
 # -----------------------------------------------------------------------------
 # Define argument parser
@@ -89,12 +87,32 @@ def get_parser():
 
     subcommands = {
         'install': {
-            "help": 'Example task #1.',
+            "help": 'Copy source data and g2 directories to a target.',
             "arguments": {
+                "--data-dir": {
+                    "dest": "data_dir",
+                    "metavar": "SENZING_DATA_DIR",
+                    "help": "Location of Senzing's data. Default: /opt/senzing/data"
+                },
                 "--debug": {
                     "dest": "debug",
                     "action": "store_true",
                     "help": "Enable debugging. (SENZING_DEBUG) Default: False"
+                },
+                "--g2-dir": {
+                    "dest": "g2_dir",
+                    "metavar": "SENZING_G2_DIR",
+                    "help": "Location of Senzing's G2. Default: /opt/senzing/g2"
+                },
+                "--source-data-dir": {
+                    "dest": "source_data_dir",
+                    "metavar": "SENZING_SOURCE_DATA_DIR",
+                    "help": "Source location of Senzing's data. Default: /opt/senzing-source/data/1.0.0"
+                },
+                "--source-g2-dir": {
+                    "dest": "source_g2_dir",
+                    "metavar": "SENZING_SOURCE_G2_DIR",
+                    "help": "Source location of Senzing's G2. Default: /opt/senzing-source/g2"
                 },
             },
         },
@@ -417,225 +435,6 @@ def exit_error(index, *args):
 def exit_silently():
     ''' Exit program. '''
     sys.exit(0)
-
-
-def get_config():
-    return config
-
-# -----------------------------------------------------------------------------
-# Utility functions
-# -----------------------------------------------------------------------------
-
-
-def XX_common_prolog(config):
-    '''Common steps for most do_* functions.'''
-    validate_configuration(config)
-    logging.info(entry_template(config))
-
-
-def XX_delete_sentinel_files(config):
-    '''Delete the sentinel file used to signal that processing was done.'''
-    senzing_dir = config.get('senzing_dir')
-    files = [
-        "{0}/docker-runs.sentinel".format(senzing_dir),
-        "{0}/mysql-init.sentinel".format(senzing_dir)
-    ]
-
-    # Delete files.
-
-    for file in files:
-        try:
-            os.remove(file)
-            logging.info(message_info(135, senzing_g2_dir))
-        except:
-            pass
-
-
-def XX_file_ownership(config):
-    '''Modify file ownership (i.e. chown).'''
-    senzing_dir = config.get('senzing_dir')
-
-    # Determine ownership of senzing_dir.
-
-    stat_info = os.stat(senzing_dir)
-    user_id = stat_info.st_uid
-    group_id = stat_info.st_gid
-
-    # Adjust file ownership.
-
-    senzing_directories = get_senzing_directories(config)
-    for senzing_directory in senzing_directories:
-        for dirpath, dirnames, filenames in os.walk(senzing_directory):
-            for dname in dirnames:
-                try:
-                    os.chown(os.path.join(dirpath, dname), user_id, group_id)
-                except:
-                    continue
-            for fname in filenames:
-                try:
-                    os.chown(os.path.join(dirpath, fname), user_id, group_id)
-                except:
-                    continue
-
-
-def XX_get_installed_version(config):
-    '''Get version of Senzing seen in senzing_dir.'''
-    result = None
-    senzing_dir = config.get('senzing_dir')
-    version_file = "{0}/g2/data/g2BuildVersion.json".format(senzing_dir)
-
-    # Read version file.
-
-    try:
-        with open(version_file) as version_json_file:
-            version_dictionary = json.load(version_json_file)
-            result = version_dictionary.get('VERSION')
-            logging.info(message_info(130, result, version_file))
-    except:
-        logging.info(message_warning(301, version_file))
-
-    return result
-
-
-def XX_get_senzing_directories(config):
-    '''Get directories within /opt/senzing.'''
-    senzing_dir = config.get('senzing_dir')
-    return [
-        "{0}/g2".format(senzing_dir),
-        "{0}/db2".format(senzing_dir)
-    ]
-
-# -----------------------------------------------------------------------------
-# Archive functions
-# -----------------------------------------------------------------------------
-
-
-def XX_archive_path(source, installed_version):
-    '''Move source to a backup path.'''
-
-    # Construct backup name.
-
-    target = source
-    if installed_version:
-        target = "{0}-{1}".format(target, installed_version)
-    target = "{0}.{1}".format(target, int(time.time()))
-
-    # Move path.
-
-    try:
-        shutil.move(source, target)
-        logging.info(message_info(132, source, target))
-    except:
-        logging.info(message_warning(302, source, target))
-
-
-def XX_archive_paths(config):
-    '''Archive all paths by moving to a new pathname.
-       Note: Can't just archive senzing_dir (/opt/senzing)
-       because it may be an attached volume in a docker image.
-    '''
-
-    # Synthesize variables.
-
-    installed_version = get_installed_version(config)
-    senzing_directories = get_senzing_directories(config)
-
-    # Archive paths.
-
-    for senzing_directory in senzing_directories:
-        if os.path.exists(senzing_directory):
-            archive_path(senzing_directory, installed_version)
-
-# -----------------------------------------------------------------------------
-# Install functions
-# -----------------------------------------------------------------------------
-
-
-def copy_directory(config, manifest):
-    '''Extract a TGZ file.'''
-    source = manifest.get("source")
-    target = manifest.get("target")
-
-    try:
-        shutil.copytree(source, target, symlinks=True)
-        logging.info(message_info(136, source, target))
-    except Exception as err:
-        logging.info(message_warning(304, source, target, err))
-
-
-def XX_install_tgz(config, manifest):
-    '''Extract a TGZ file.'''
-    source = manifest.get("source")
-    target = manifest.get("target")
-    try:
-        with tarfile.open(source) as compressed_file:
-            compressed_file.extractall(path=target)
-            logging.info(message_info(133, source, target))
-    except:
-        logging.info(message_warning(303, source, target))
-
-
-def XX_install_file(config, manifest):
-    '''Install single file.  But first, backup original file.'''
-    source = manifest.get("source")
-    target = manifest.get("target")
-    target_backup = "{0}.{1}".format(target, int(time.time()))
-    try:
-        shutil.move(target, target_backup)
-        logging.info(message_info(132, target, target_backup))
-        shutil.copyfile(source, target)
-        logging.info(message_info(136, source, target))
-    except Exception as err:
-        logging.info(message_warning(304, source, target, err))
-
-
-def XX_install_zip(config, manifest):
-    '''Extract a ZIP file.'''
-    source = manifest.get("source")
-    target = manifest.get("target")
-    try:
-        with zipfile.ZipFile(source, 'r') as compressed_file:
-            compressed_file.extractall(target)
-            logging.info(message_info(133, source, target))
-    except:
-        logging.info(message_warning(303, source, target))
-
-
-def XX_install_files(config):
-    '''Install all files based on what is in the 'downloads' directory.'''
-
-    senzing_dir = config.get('senzing_dir')
-    manifests = [
-        {
-            'source': config.get('senzing_package'),
-            'target': senzing_dir,
-            'function': install_tgz
-        }, {
-            'source': "/opt/IBM/db2",
-            'target': "{0}/db2".format(senzing_dir),
-            'function': copy_directory
-        }
-    ]
-
-    # Tricky code. The function called is specified in the manifest.
-
-    for manifest in manifests:
-        source = manifest.get("source")
-        if os.path.exists(source):
-            manifest.get("function")(config, manifest)
-        else:
-            logging.info(message_info(137, source))
-
-
-def XX_delete_files(config):
-    '''Delete all files by removing directories trees.'''
-    installed_version = get_installed_version(config)
-    senzing_directories = get_senzing_directories(config)
-    for senzing_directory in senzing_directories:
-        if os.path.exists(senzing_directory):
-            logging.info(message_info(134, senzing_directory, installed_version))
-            shutil.rmtree(senzing_directory)
-            logging.info(message_info(135, senzing_directory))
 
 # -----------------------------------------------------------------------------
 # do_* functions

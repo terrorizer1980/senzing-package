@@ -2,8 +2,10 @@
 
 ## Overview
 
-The [senzing-package.py](senzing-package.py) python script manages installing  FIXME:
+The [senzing-package.py](senzing-package.py) python script
+copies `data/` and `g2/` directories to new locations.
 The `senzing/senzing-package` docker image is a wrapper for use in docker formations (e.g. docker-compose, kubernetes).
+Baked into `senzing/senzing-package` is the installed `senzingdata-v1` and `senzingapi` packages.
 
 The dockerized version, `store/senzing/senzing-package`, is at
 [hub.docker.com/_/senzing-package](https://hub.docker.com/_/senzing-package).
@@ -12,7 +14,7 @@ For more information, scroll down to [Accept docker image](#accept-docker-image)
 To see all of the subcommands, run:
 
 ```console
-$ sudo ./senzing-package.py --help
+$ ./senzing-package.py
 usage: python-template.py [-h]
                           {install,sleep,version,docker-acceptance-test} ...
 
@@ -22,7 +24,7 @@ https://github.com/Senzing/python-template
 positional arguments:
   {install,sleep,version,docker-acceptance-test}
                         Subcommands (SENZING_SUBCOMMAND):
-    install             Example task #1.
+    install             Copy source data and g2 directories to a target.
     sleep               Do nothing but sleep. For Docker testing.
     version             Print version of program.
     docker-acceptance-test
@@ -30,7 +32,6 @@ positional arguments:
 
 optional arguments:
   -h, --help            show this help message and exit
-
 ```
 
 To see the options for a subcommand, run commands like:
@@ -147,7 +148,8 @@ Configuration values specified by environment variable or command line parameter
 
     ```console
     export SENZING_SUBCOMMAND=install
-    export SENZING_DIR=/opt/senzing
+    export SENZING_DATA_DIR=/opt/my-senzing/data
+    export SENZING_G2_DIR=/opt/my-senzing/g2
     ```
 
 #### Docker network
@@ -181,12 +183,19 @@ Configuration values specified by environment variable or command line parameter
 :thinking: **Optional:**  The docker container runs as "USER 1001".
 Use if a different userid (UID) is required.
 
-1. :pencil2: Identify user.
+1. :pencil2: Manually identify user.
    User "0" is root.
    Example:
 
     ```console
     export SENZING_RUNAS_USER="0"
+    ```
+
+   Another option, use current user.
+   Example:
+
+    ```console
+    export SENZING_RUNAS_USER=$(id -u)
     ```
 
 1. Construct parameter for `docker run`.
