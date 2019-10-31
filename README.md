@@ -2,7 +2,7 @@
 
 ## Overview
 
-The [senzing-package.py](senzing-package.py) python script manages installing `Senzing_API.tgz`.
+The [senzing-package.py](senzing-package.py) python script manages installing  FIXME:
 The `senzing/senzing-package` docker image is a wrapper for use in docker formations (e.g. docker-compose, kubernetes).
 
 The dockerized version, `store/senzing/senzing-package`, is at
@@ -12,32 +12,25 @@ For more information, scroll down to [Accept docker image](#accept-docker-image)
 To see all of the subcommands, run:
 
 ```console
-$ ./senzing-package.py --help
-usage: senzing-package.py [-h]
-                          {install,replace,delete,installed-version,package-version,version,sleep,docker-acceptance-test}
-                          ...
+$ sudo ./senzing-package.py --help
+usage: python-template.py [-h]
+                          {install,sleep,version,docker-acceptance-test} ...
 
-Senzing package management. For more information, see
-https://github.com/senzing/senzing-package
+Example python skeleton. For more information, see
+https://github.com/Senzing/python-template
 
 positional arguments:
-  {install,replace,delete,installed-version,package-version,version,sleep,docker-acceptance-test}
+  {install,sleep,version,docker-acceptance-test}
                         Subcommands (SENZING_SUBCOMMAND):
-    install             Backup existing directory and install to a clean
-                        directory.
-    replace             Delete existing directory and install to a clean
-                        directory.
-    delete              Delete existing directory.
-    installed-version   Show the version of the currently installed Senzing
-                        package.
-    package-version     Show the version of the Senzing_API.tgz package.
-    version             Print the version of senzing-package.py.
+    install             Example task #1.
     sleep               Do nothing but sleep. For Docker testing.
+    version             Print version of program.
     docker-acceptance-test
                         For Docker acceptance testing.
 
 optional arguments:
   -h, --help            show this help message and exit
+
 ```
 
 To see the options for a subcommand, run commands like:
@@ -144,7 +137,8 @@ See [Develop](#develop).
 
     ```console
     export SENZING_SUBCOMMAND=install
-    export SENZING_DIR=/opt/senzing
+    export SENZING_DATA_DIR=/opt/my-senzing/data
+    export SENZING_G2_DIR=/opt/my-senzing/g2
     ```
 
 1. Run the docker container.  Example:
@@ -153,7 +147,8 @@ See [Develop](#develop).
     sudo docker run \
       --env SENZING_SUBCOMMAND="${SENZING_SUBCOMMAND}" \
       --rm \
-      --volume ${SENZING_DIR}:/opt/senzing \
+      --volume ${SENZING_DATA_DIR}:/opt/senzing/data \
+      --volume ${SENZING_G2_DIR}:/opt/senzing/g2 \
       senzing/senzing-package
     ```
 

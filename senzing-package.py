@@ -63,7 +63,7 @@ configuration_locator = {
     },
     "source_g2_dir": {
         "default": "/opt/senzing-original/g2",
-        "env": "SENZING_SOURCE_ETC_DIR",
+        "env": "SENZING_SOURCE_G2_DIR",
         "cli": "source-g2-dir"
     },
     "subcommand": {

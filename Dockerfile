@@ -16,6 +16,7 @@ RUN apt update \
     apt-transport-https \
     curl \
     gnupg \
+    python3 \
     sudo \
     wget
 
