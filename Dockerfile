@@ -36,6 +36,7 @@ COPY ./senzing-package.py /app/
 
 # Install system packages
 
+ENV SENZING_ACCEPT_EULA=I_ACCEPT_THE_SENZING_EULA
 RUN apt -y install senzingdata-v1 senzingapi
 
 # Move files.
