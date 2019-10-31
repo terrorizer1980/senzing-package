@@ -54,9 +54,7 @@ To see the options for a subcommand, run commands like:
 1. [Demonstrate using Docker](#demonstrate-using-docker)
     1. [Accept docker image](#accept-docker-image)
     1. [Configuration](#configuration)
-    1. [Run docker container](#run-docker-container)
-    1. [Demonstrate stand-alone](#demonstrate-stand-alone)
-    1. [Demonstrate in docker-compose](#demonstrate-in-docker-compose)
+    1. [Demonstrate using Docker](#demonstrate-using-docker)
 1. [Develop](#develop)
     1. [Prerequisite software](#prerequisite-software)
     1. [Clone repository](#clone-repository)
@@ -119,30 +117,7 @@ Configuration values specified by environment variable or command line parameter
     ./senzing-package.py <subcommand> --help
     ```
 
-### Demonstrate stand-alone
-
-1. :pencil2: Set environment variables.
-   Example:
-
-    ```console
-    export SENZING_SUBCOMMAND=install
-    export SENZING_DATA_DIR=/opt/my-senzing/data
-    export SENZING_G2_DIR=/opt/my-senzing/g2
-    ```
-
-1. Run docker container.
-   Example:
-
-    ```console
-    sudo docker run \
-      --env SENZING_SUBCOMMAND="${SENZING_SUBCOMMAND}" \
-      --rm \
-      --volume ${SENZING_DATA_DIR}:/opt/senzing/data \
-      --volume ${SENZING_G2_DIR}:/opt/senzing/g2 \
-      senzing/senzing-package
-    ```
-
-### Demonstrate in docker-compose
+### Demonstrate using Docker
 
 1. :pencil2: Set environment variables.  Example:
 
