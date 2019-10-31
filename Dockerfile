@@ -5,7 +5,7 @@ ENV REFRESHED_AT=2019-11-01
 
 LABEL Name="senzing/senzing-package" \
       Maintainer="support@senzing.com" \
-      Version="1.13.0"
+      Version="1.12.1"
 
 HEALTHCHECK CMD ["/app/healthcheck.sh"]
 
@@ -17,6 +17,7 @@ RUN apt update \
     curl \
     gnupg \
     python3 \
+    python3-distutils \
     sudo \
     wget
 
@@ -30,7 +31,7 @@ RUN curl \
  && apt update \
  && rm /senzingrepo_1.0.0-1_amd64.deb
 
-# Install system packages
+# Install system packages.
 
 ENV SENZING_ACCEPT_EULA=I_ACCEPT_THE_SENZING_EULA
 RUN apt -y install senzingdata-v1 senzingapi

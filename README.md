@@ -46,45 +46,41 @@ To see the options for a subcommand, run commands like:
 
 ### Contents
 
-1. [Using Command Line](#using-command-line)
-    1. [Install](#install)
-    1. [Demonstrate](#demonstrate)
-1. [Using Docker](#using-docker)
-    1. [Expectations](#expectations)
-    1. [Build docker image](#build-docker-image)
+1. [Expectations](#expectations)
+    1. [Space](#space)
+    1. [Time](#time)
+    1. [Background knowledge](#background-knowledge)
+1. [Demonstrate using Docker](#demonstrate-using-docker)
+    1. [Accept docker image](#accept-docker-image)
     1. [Configuration](#configuration)
     1. [Run docker container](#run-docker-container)
+    1. [Demonstrate stand-alone](#demonstrate-stand-alone)
+    1. [Demonstrate in docker-compose](#demonstrate-in-docker-compose)
 1. [Develop](#develop)
     1. [Prerequisite software](#prerequisite-software)
     1. [Clone repository](#clone-repository)
-    1. [Downloads](#downloads)
     1. [Build docker image for development](#build-docker-image-for-development)
 1. [Examples](#examples)
 1. [Errors](#errors)
+1. [References](#references)
 
-## Using Command Line
+## Expectations
 
-### Install
-
-### Demonstrate
-
-## Using Docker
-
-### Expectations
-
-#### Space
+### Space
 
 This repository and demonstration require 6 GB free disk space.
 
-#### Time
+### Time
 
 Budget 40 minutes to get the demonstration up-and-running, depending on CPU and network speeds.
 
-#### Background knowledge
+### Background knowledge
 
 This repository assumes a working knowledge of:
 
 1. [Docker](https://github.com/Senzing/knowledge-base/blob/master/WHATIS/docker.md)
+
+## Demonstrate using Docker
 
 ### Accept docker image
 
@@ -103,25 +99,18 @@ To accept the license:
    sudo docker pull store/senzing/senzing-package:0.0.1
    ```
 
-### Build docker image
-
-See [Develop](#develop).
-
 ### Configuration
 
-* **SENZING_DEBUG** -
-  Enable debug information. Values: 0=no debug; 1=debug. Default: 0.
-* **SENZING_DIR** -
-  Path on the local system where
-  [Senzing_API.tgz](https://s3.amazonaws.com/public-read-access/SenzingComDownloads/Senzing_API.tgz)
-  has been extracted.
-  Default: `/opt/senzing`
-* **SENZING_PACKAGE** -
-  Full path name to Senzing_API.tgz.  Default: `downloads/Senzing_API.tgz`.
-* **SENZING_SLEEP_TIME_IN_SECONDS** -
-  Number of seconds to sleep when using `sleep` subcommand.  Usually used for debugging.  Default: 0 (infinite).
-* **SENZING_SUBCOMMAND** -
-  Identify the subcommand to be run. See `senzing-package.py --help` for complete list.
+Configuration values specified by environment variable or command line parameter.
+
+- **[SENZING_DATA_DIR](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_data_dir)**
+- **[SENZING_DEBUG](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_debug)**
+- **[SENZING_G2_DIR](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_g2_dir)**
+- **[SENZING_LOG_LEVEL](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_log_level)**
+- **[SENZING_NETWORK](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_network)**
+- **[SENZING_RUNAS_USER](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_runas_user)**
+- **[SENZING_SLEEP_TIME](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_sleep_time)**
+- **[SENZING_SUBCOMMAND](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_subcommand)**
 
 1. To determine which configuration parameters are use for each `<subcommand>`, run:
 
@@ -129,11 +118,10 @@ See [Develop](#develop).
     ./senzing-package.py <subcommand> --help
     ```
 
-### Run docker container
+### Demonstrate stand-alone
 
-#### Demonstrate stand-alone
-
-1. :pencil2: Set environment variables.  Example:
+1. :pencil2: Set environment variables.
+   Example:
 
     ```console
     export SENZING_SUBCOMMAND=install
@@ -141,7 +129,8 @@ See [Develop](#develop).
     export SENZING_G2_DIR=/opt/my-senzing/g2
     ```
 
-1. Run the docker container.  Example:
+1. Run docker container.
+   Example:
 
     ```console
     sudo docker run \
@@ -152,16 +141,7 @@ See [Develop](#develop).
       senzing/senzing-package
     ```
 
-#### Demonstrate in docker-compose
-
-1. :pencil2: Determine docker network.  Example:
-
-    ```console
-    sudo docker network ls
-
-    # Choose value from NAME column of docker network ls
-    export SENZING_NETWORK=nameofthe_network
-    ```
+### Demonstrate in docker-compose
 
 1. :pencil2: Set environment variables.  Example:
 
@@ -170,14 +150,65 @@ See [Develop](#develop).
     export SENZING_DIR=/opt/senzing
     ```
 
-1. Run the docker container.  Example:
+#### Docker network
+
+:thinking: **Optional:**  Use if docker container is part of a docker network.
+
+1. List docker networks.
+   Example:
+
+    ```console
+    sudo docker network ls
+    ```
+
+1. :pencil2: Specify docker network.
+   Choose value from NAME column of `docker network ls`.
+   Example:
+
+    ```console
+    export SENZING_NETWORK=*nameofthe_network*
+    ```
+
+1. Construct parameter for `docker run`.
+   Example:
+
+    ```console
+    export SENZING_NETWORK_PARAMETER="--net ${SENZING_NETWORK}"
+    ```
+
+#### Docker user
+
+:thinking: **Optional:**  The docker container runs as "USER 1001".
+Use if a different userid (UID) is required.
+
+1. :pencil2: Identify user.
+   User "0" is root.
+   Example:
+
+    ```console
+    export SENZING_RUNAS_USER="0"
+    ```
+
+1. Construct parameter for `docker run`.
+   Example:
+
+    ```console
+    export SENZING_RUNAS_USER_PARAMETER="--user ${SENZING_RUNAS_USER}"
+    ```
+
+#### Run docker container
+
+1. Run docker container.
+   Example:
 
     ```console
     sudo docker run \
+      ${SENZING_RUNAS_USER_PARAMETER} \
+      ${SENZING_NETWORK_PARAMETER} \
       --env SENZING_SUBCOMMAND="${SENZING_SUBCOMMAND}" \
-      --net ${SENZING_NETWORK} \
       --rm \
-      --volume ${SENZING_DIR}:/opt/senzing \
+      --volume ${SENZING_DATA_DIR}:/opt/senzing/data \
+      --volume ${SENZING_G2_DIR}:/opt/senzing/g2 \
       senzing/senzing-package
     ```
 
@@ -193,66 +224,48 @@ The following software programs need to be installed:
 
 ### Clone repository
 
+For more information on environment variables,
+see [Environment Variables](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md).
+
 1. Set these environment variable values:
 
     ```console
     export GIT_ACCOUNT=senzing
     export GIT_REPOSITORY=senzing-package
-    ```
-
-1. Follow steps in [clone-repository](https://github.com/Senzing/knowledge-base/blob/master/HOWTO/clone-repository.md) to install the Git repository.
-
-1. After the repository has been cloned, be sure the following are set:
-
-    ```console
     export GIT_ACCOUNT_DIR=~/${GIT_ACCOUNT}.git
     export GIT_REPOSITORY_DIR="${GIT_ACCOUNT_DIR}/${GIT_REPOSITORY}"
     ```
 
-### Downloads
-
-#### Download Senzing_API.tgz
-
-1. Visit [Downloading Senzing_API.tgz](https://github.com/Senzing/knowledge-base/blob/master/HOWTO/create-senzing-dir.md#downloading-senzing_apitgz)
-1. Download `Senzing_API.tgz` to ${GIT_REPOSITORY_DIR}/[downloads](./downloads) directory.
-
-#### Download ibm_data_server_driver_for_odbc_cli_linuxx64_v11.1.tar.gz
-
-1. Visit [Download initial Version 11.1 clients and drivers](http://www-01.ibm.com/support/docview.wss?uid=swg21385217)
-    1. Click on "[IBM Data Server Driver for ODBC and CLI (CLI Driver)](http://www.ibm.com/services/forms/preLogin.do?source=swg-idsoc97)" link.
-    1. Select :radio_button:  "IBM Data Server Driver for ODBC and CLI (Linux AMD64 and Intel EM64T)"
-    1. Click "Continue" button.
-    1. Choose download method and click "Download now" button.
-    1. Download `ibm_data_server_driver_for_odbc_cli_linuxx64_v11.1.tar.gz` to ${GIT_REPOSITORY_DIR}/[downloads](./downloads) directory.
-
-#### Download v11.1.4fp4a_jdbc_sqlj.tar.gz
-
-1. Visit [DB2 JDBC Driver Versions and Downloads](http://www-01.ibm.com/support/docview.wss?uid=swg21363866)
-    1. In DB2 Version 11.1 > JDBC 3.0 Driver version, click on "3.72.52" link for "v11.1 M4 FP4 iFix1"
-    1. Click on "DSClients--jdbc_sqlj-11.1.4.4-FP004a" link.
-    1. Click on "v11.1.4fp4a_jdbc_sqlj.tar.gz" link to download.
-    1. Download `v11.1.4fp4a_jdbc_sqlj.tar.gz` to ${GIT_REPOSITORY_DIR}/[downloads](./downloads) directory.
+1. Follow steps in [clone-repository](https://github.com/Senzing/knowledge-base/blob/master/HOWTO/clone-repository.md) to install the Git repository.
 
 ### Build docker image for development
 
-1. Option #1 - Using docker command and local repository.
+1. **Option #1:** Using `docker` command and GitHub.
+
+    ```console
+    sudo docker build --tag senzing/template https://github.com/senzing/senzing-package.git
+    ```
+
+1. **Option #2:** Using `docker` command and local repository.
 
     ```console
     cd ${GIT_REPOSITORY_DIR}
     sudo docker build --tag senzing/senzing-package .
     ```
 
-1. Option #2 - Using make command.
+1. **Option #3:** Using `make` command.
 
     ```console
     cd ${GIT_REPOSITORY_DIR}
     sudo make docker-build
     ```
 
-    Note: `sudo make docker-build-base` can be used to create cached docker layers.
+    Note: `sudo make docker-build-development-cache` can be used to create cached docker layers.
 
 ## Examples
 
 ## Errors
 
 1. See [docs/errors.md](docs/errors.md).
+
+## References

@@ -5,6 +5,7 @@
 # -----------------------------------------------------------------------------
 
 import argparse
+import distutils.dir_util
 import grp
 import json
 import logging
@@ -57,12 +58,12 @@ configuration_locator = {
         "cli": "sleep-time-in-seconds"
     },
     "source_data_dir": {
-        "default": "/opt/senzing-original/data/1.0.0",
+        "default": "/opt/senzing-source/data/1.0.0",
         "env": "SENZING_SOURCE_DATA_DIR",
         "cli": "source-data-dir"
     },
     "source_g2_dir": {
-        "default": "/opt/senzing-original/g2",
+        "default": "/opt/senzing-source/g2",
         "env": "SENZING_SOURCE_G2_DIR",
         "cli": "source-g2-dir"
     },
@@ -165,8 +166,7 @@ message_dictionary = {
     "301": "Cannot determine version. {0} does not exist.",
     "302": "Cannot move {0} to {1}.",
     "303": "Cannot extract {0} to {1}.",
-    "304": "Cannot copy {0} to {1}.",
-
+    "304": "Cannot copy {0} to {1}. Error: {2}",
     "499": "{0}",
     "500": "senzing-" + SENZING_PRODUCT_ID + "{0:04d}E",
     "695": "Unknown database scheme '{0}' in database url '{1}'",
@@ -559,8 +559,8 @@ def copy_directory(config, manifest):
     try:
         shutil.copytree(source, target, symlinks=True)
         logging.info(message_info(136, source, target))
-    except:
-        logging.info(message_warning(304, source, target))
+    except Exception as err:
+        logging.info(message_warning(304, source, target, err))
 
 
 def XX_install_tgz(config, manifest):
@@ -585,8 +585,8 @@ def XX_install_file(config, manifest):
         logging.info(message_info(132, target, target_backup))
         shutil.copyfile(source, target)
         logging.info(message_info(136, source, target))
-    except:
-        logging.info(message_warning(304, source, target))
+    except Exception as err:
+        logging.info(message_warning(304, source, target, err))
 
 
 def XX_install_zip(config, manifest):
@@ -666,8 +666,8 @@ def do_install(args):
 
     config = get_configuration(args)
 
-    source_data_dir = config.get('data_dir')
-    target_data_dir = config.get('source_data_dir')
+    source_data_dir = config.get('source_data_dir')
+    target_data_dir = config.get('data_dir')
     source_g2_dir = config.get('source_g2_dir')
     target_g2_dir = config.get('g2_dir')
 
@@ -679,16 +679,16 @@ def do_install(args):
     # Perform action.
 
     try:
-        shutil.copytree(source_data_dir, target_data_dir, symlinks=True)
+        distutils.dir_util.copy_tree(source_data_dir, target_data_dir, preserve_symlinks=1)
         logging.info(message_info(136, source_data_dir, target_data_dir))
-    except:
-        logging.info(message_warning(304, source_data_dir, target_data_dir))
+    except Exception as err:
+        logging.info(message_warning(304, source_data_dir, target_data_dir, err))
 
     try:
-        shutil.copytree(source_g2_dir, target_g2_dir, symlinks=True)
+        distutils.dir_util.copy_tree(source_g2_dir, target_g2_dir, preserve_symlinks=1)
         logging.info(message_info(136, source_g2_dir, target_g2_dir))
-    except:
-        logging.info(message_warning(304, source_g2_dir, target_g2_dir))
+    except Exception as err:
+        logging.info(message_warning(304, source_g2_dir, target_g2_dir, err))
 
     # Epilog.
 
