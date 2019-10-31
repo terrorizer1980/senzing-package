@@ -36,30 +36,40 @@ GIGABYTES = 1024 * MEGABYTES
 
 config = {}
 configuration_locator = {
+    "data_dir": {
+        "default": "/opt/senzing/data",
+        "env": "SENZING_DATA_DIR",
+        "cli": "data-dir"
+    },
     "debug": {
         "default": False,
         "env": "SENZING_DEBUG",
         "cli": "debug"
     },
-    "senzing_dir": {
-        "default": "/opt/senzing",
-        "env": "SENZING_DIR",
-        "cli": "senzing-dir"
-    },
-    "senzing_package": {
-        "default": "downloads/Senzing_API.tgz",
-        "env": "SENZING_PACKAGE",
-        "cli": "senzing-package"
+    "g2_dir": {
+        "default": "/opt/senzing/g2",
+        "env": "SENZING_G2_DIR",
+        "cli": "g2-dir"
     },
     "sleep_time_in_seconds": {
         "default": 0,
         "env": "SENZING_SLEEP_TIME_IN_SECONDS",
         "cli": "sleep-time-in-seconds"
     },
+    "source_data_dir": {
+        "default": "/opt/senzing-original/data/1.0.0",
+        "env": "SENZING_SOURCE_DATA_DIR",
+        "cli": "source-data-dir"
+    },
+    "source_g2_dir": {
+        "default": "/opt/senzing-original/g2",
+        "env": "SENZING_SOURCE_ETC_DIR",
+        "cli": "source-g2-dir"
+    },
     "subcommand": {
         "default": None,
         "env": "SENZING_SUBCOMMAND",
-    }
+    },
 }
 
 # Enumerate keys in 'configuration_locator' that should not be printed to the log.
@@ -77,43 +87,13 @@ def get_parser():
     ''' Parse commandline arguments. '''
 
     subcommands = {
-        'task1': {
+        'install': {
             "help": 'Example task #1.',
             "arguments": {
                 "--debug": {
                     "dest": "debug",
                     "action": "store_true",
                     "help": "Enable debugging. (SENZING_DEBUG) Default: False"
-                },
-                "--password": {
-                    "dest": "password",
-                    "metavar": "SENZING_PASSWORD",
-                    "help": "Example of information redacted in the log. Default: None"
-                },
-                "--senzing-dir": {
-                    "dest": "senzing_dir",
-                    "metavar": "SENZING_DIR",
-                    "help": "Location of Senzing. Default: /opt/senzing"
-                },
-            },
-        },
-        'task2': {
-            "help": 'Example task #2.',
-            "arguments": {
-                "--debug": {
-                    "dest": "debug",
-                    "action": "store_true",
-                    "help": "Enable debugging. (SENZING_DEBUG) Default: False"
-                },
-                "--password": {
-                    "dest": "password",
-                    "metavar": "SENZING_PASSWORD",
-                    "help": "Example of information redacted in the log. Default: None"
-                },
-                "--senzing-dir": {
-                    "dest": "senzing_dir",
-                    "metavar": "SENZING_DIR",
-                    "help": "Location of Senzing. Default: /opt/senzing"
                 },
             },
         },
@@ -144,43 +124,6 @@ def get_parser():
         subparser = subparsers.add_parser(subcommand_key, help=subcommand_help)
         for argument_key, argument_values in subcommand_arguments.items():
             subparser.add_argument(argument_key, **argument_values)
-
-    return parser
-
-
-def get_parser():
-    '''Parse commandline arguments.'''
-    parser = argparse.ArgumentParser(prog="senzing-package.py", description="Senzing package management. For more information, see https://github.com/senzing/senzing-package")
-    subparsers = parser.add_subparsers(dest='subcommand', help='Subcommands (SENZING_SUBCOMMAND):')
-
-    subparser_1 = subparsers.add_parser('install', help='Backup existing directory and install to a clean directory.')
-    subparser_1.add_argument("--senzing-dir", dest="senzing_dir", metavar="SENZING_DIR", help="Senzing directory.  DEFAULT: /opt/senzing")
-    subparser_1.add_argument("--senzing-package", dest="senzing_package", metavar="SENZING_PACKAGE", help="Path to Senzing package.  DEFAULT: downloads/Senzing_API.tgz")
-    subparser_1.add_argument("--debug", dest="debug", action="store_true", help="Enable debugging. (SENZING_DEBUG) Default: False")
-
-    subparser_2 = subparsers.add_parser('replace', help='Delete existing directory and install to a clean directory.')
-    subparser_2.add_argument("--senzing-dir", dest="senzing_dir", metavar="SENZING_DIR", help="Senzing directory.  DEFAULT: /opt/senzing")
-    subparser_2.add_argument("--senzing-package", dest="senzing_package", metavar="SENZING_PACKAGE", help="Path to Senzing package.  DEFAULT: downloads/Senzing_API.tgz")
-    subparser_2.add_argument("--debug", dest="debug", action="store_true", help="Enable debugging. (SENZING_DEBUG) Default: False")
-
-    subparser_3 = subparsers.add_parser('delete', help='Delete existing directory.')
-    subparser_3.add_argument("--senzing-dir", dest="senzing_dir", metavar="SENZING_DIR", help="Senzing directory.  DEFAULT: /opt/senzing")
-    subparser_3.add_argument("--debug", dest="debug", action="store_true", help="Enable debugging. (SENZING_DEBUG) Default: False")
-
-    subparser_4 = subparsers.add_parser('installed-version', help='Show the version of the currently installed Senzing package.')
-    subparser_4.add_argument("--senzing-dir", dest="senzing_dir", metavar="SENZING_DIR", help="Senzing directory.  DEFAULT: /opt/senzing")
-    subparser_4.add_argument("--debug", dest="debug", action="store_true", help="Enable debugging. (SENZING_DEBUG) Default: False")
-
-    subparser_5 = subparsers.add_parser('package-version', help='Show the version of the Senzing_API.tgz package.')
-    subparser_5.add_argument("--senzing-package", dest="senzing_package", metavar="SENZING_PACKAGE", help="Path to Senzing package.  DEFAULT: downloads/Senzing_API.tgz")
-    subparser_5.add_argument("--debug", dest="debug", action="store_true", help="Enable debugging. (SENZING_DEBUG) Default: False")
-
-    subparser_8 = subparsers.add_parser('version', help='Print the version of senzing-package.py.')
-
-    subparser_9 = subparsers.add_parser('sleep', help='Do nothing but sleep. For Docker testing.')
-    subparser_9.add_argument("--sleep-time-in-seconds", dest="sleep_time_in_seconds", metavar="SENZING_SLEEP_TIME_IN_SECONDS", help="Sleep time in seconds. DEFAULT: 0 (infinite)")
-
-    subparser_10 = subparsers.add_parser('docker-acceptance-test', help='For Docker acceptance testing.')
 
     return parser
 
@@ -249,6 +192,7 @@ message_dictionary = {
     "900": "senzing-" + SENZING_PRODUCT_ID + "{0:04d}D",
     "999": "{0}",
 }
+
 
 def message(index, *args):
     index_string = str(index)
@@ -343,7 +287,9 @@ def get_configuration(args):
 
     # Special case: Change boolean strings to booleans.
 
-    booleans = ['debug']
+    booleans = [
+        'debug'
+    ]
     for boolean in booleans:
         boolean_value = result.get(boolean)
         if isinstance(boolean_value, str):
@@ -357,7 +303,7 @@ def get_configuration(args):
 
     integers = [
         'sleep_time_in_seconds'
-        ]
+    ]
     for integer in integers:
         integer_string = result.get(integer)
         result[integer] = int(integer_string)
@@ -481,13 +427,13 @@ def get_config():
 # -----------------------------------------------------------------------------
 
 
-def common_prolog(config):
+def XX_common_prolog(config):
     '''Common steps for most do_* functions.'''
     validate_configuration(config)
     logging.info(entry_template(config))
 
 
-def delete_sentinel_files(config):
+def XX_delete_sentinel_files(config):
     '''Delete the sentinel file used to signal that processing was done.'''
     senzing_dir = config.get('senzing_dir')
     files = [
@@ -505,7 +451,7 @@ def delete_sentinel_files(config):
             pass
 
 
-def file_ownership(config):
+def XX_file_ownership(config):
     '''Modify file ownership (i.e. chown).'''
     senzing_dir = config.get('senzing_dir')
 
@@ -532,7 +478,7 @@ def file_ownership(config):
                     continue
 
 
-def get_installed_version(config):
+def XX_get_installed_version(config):
     '''Get version of Senzing seen in senzing_dir.'''
     result = None
     senzing_dir = config.get('senzing_dir')
@@ -551,7 +497,7 @@ def get_installed_version(config):
     return result
 
 
-def get_senzing_directories(config):
+def XX_get_senzing_directories(config):
     '''Get directories within /opt/senzing.'''
     senzing_dir = config.get('senzing_dir')
     return [
@@ -564,7 +510,7 @@ def get_senzing_directories(config):
 # -----------------------------------------------------------------------------
 
 
-def archive_path(source, installed_version):
+def XX_archive_path(source, installed_version):
     '''Move source to a backup path.'''
 
     # Construct backup name.
@@ -583,7 +529,7 @@ def archive_path(source, installed_version):
         logging.info(message_warn(302, source, target))
 
 
-def archive_paths(config):
+def XX_archive_paths(config):
     '''Archive all paths by moving to a new pathname.
        Note: Can't just archive senzing_dir (/opt/senzing)
        because it may be an attached volume in a docker image.
@@ -617,7 +563,7 @@ def copy_directory(config, manifest):
         logging.info(message_warn(304, source, target))
 
 
-def install_tgz(config, manifest):
+def XX_install_tgz(config, manifest):
     '''Extract a TGZ file.'''
     source = manifest.get("source")
     target = manifest.get("target")
@@ -629,7 +575,7 @@ def install_tgz(config, manifest):
         logging.info(message_warn(303, source, target))
 
 
-def install_file(config, manifest):
+def XX_install_file(config, manifest):
     '''Install single file.  But first, backup original file.'''
     source = manifest.get("source")
     target = manifest.get("target")
@@ -643,7 +589,7 @@ def install_file(config, manifest):
         logging.info(message_warn(304, source, target))
 
 
-def install_zip(config, manifest):
+def XX_install_zip(config, manifest):
     '''Extract a ZIP file.'''
     source = manifest.get("source")
     target = manifest.get("target")
@@ -655,7 +601,7 @@ def install_zip(config, manifest):
         logging.info(message_warn(303, source, target))
 
 
-def install_files(config):
+def XX_install_files(config):
     '''Install all files based on what is in the 'downloads' directory.'''
 
     senzing_dir = config.get('senzing_dir')
@@ -681,7 +627,7 @@ def install_files(config):
             logging.info(message_info(137, source))
 
 
-def delete_files(config):
+def XX_delete_files(config):
     '''Delete all files by removing directories trees.'''
     installed_version = get_installed_version(config)
     senzing_directories = get_senzing_directories(config)
@@ -693,45 +639,16 @@ def delete_files(config):
 
 # -----------------------------------------------------------------------------
 # do_* functions
-#   Common function signature: do_XXX(config)
+#   Common function signature: do_XXX(args)
 # -----------------------------------------------------------------------------
 
 
-def do_installed_version(config):
-    '''Get installed version of Senzing API.'''
+def do_docker_acceptance_test(args):
+    ''' For use with Docker acceptance testing. '''
 
-    # Prolog.
+    # Get context from CLI, environment variables, and ini files.
 
-    common_prolog(config)
-
-    # Perform action.
-
-    get_installed_version(config)
-
-    # Epilog.
-
-    logging.info(exit_template(config))
-
-
-def do_delete(config):
-    '''Delete the installed Senzing_API.tgz .'''
-
-    # Prolog.
-
-    common_prolog(config)
-
-    # Perform action.
-
-    delete_files(config)
-    delete_sentinel_files(config)
-
-    # Epilog.
-
-    logging.info(exit_template(config))
-
-
-def do_docker_acceptance_test(config):
-    '''Sleep.'''
+    config = get_configuration(args)
 
     # Prolog.
 
@@ -742,69 +659,40 @@ def do_docker_acceptance_test(config):
     logging.info(exit_template(config))
 
 
-def do_install(config):
+def do_install(args):
     '''Install Senzing_API.tgz package. Backup existing version.'''
 
+    # Get context from CLI, environment variables, and ini files.
+
+    config = get_configuration(args)
+
+    source_data_dir = config.get('data_dir')
+    target_data_dir = config.get('source_data_dir')
+    source_g2_dir = config.get('source_g2_dir')
+    target_g2_dir = config.get('g2_dir')
+
     # Prolog.
 
-    common_prolog(config)
+    validate_configuration(config)
+    logging.info(entry_template(config))
 
     # Perform action.
 
-    archive_paths(config)
-    delete_sentinel_files(config)
-    install_files(config)
-    file_ownership(config)
-
-    # Epilog.
-
-    logging.info(exit_template(config))
-
-
-def do_package_version(config):
-    '''Get version in Senzing_API.tgz package.'''
-
-    # Prolog.
-
-    common_prolog(config)
-
-    # Pull values from configuration.
-
-    senzing_package = config.get('senzing_package')
-
-    # Synthesize variables
-
-    version_file = "g2/data/g2BuildVersion.json"
-
-    # Read version file in tarball.
-
+    source = "/opt/senzing-original/data/1.0.0"
+    target = "/opt/senzing/data"
     try:
-        with tarfile.open(senzing_package) as senzing_package_file:
-            version_json_file = senzing_package_file.extractfile(version_file)
-            version_dictionary = json.load(version_json_file)
-            logging.info(message_info(131, version_dictionary.get('VERSION'), senzing_package))
-
+        shutil.copytree(source, target, symlinks=True)
+        logging.info(message_info(136, source, target))
     except:
-        logging.info(message_warn(301, senzing_package))
+        logging.info(message_warn(304, source, target))
 
-    # Epilog.
-
-    logging.info(exit_template(config))
-
-
-def do_replace(config):
-    '''Install Senzing_API.tgz package. Do not backup existing version.'''
-
-    # Prolog.
-
-    common_prolog(config)
-
-    # Perform action.
-
-    delete_files(config)
-    delete_sentinel_files(config)
-    install_files(config)
-    file_ownership(config)
+    source = "/opt/senzing-original/g2"
+    target = "/opt/senzing/g2"
+    try:
+        shutil.copytree(source, target, symlinks=True)
+        logging.info(message_info(136, source, target))
+    except:
+        logging.info(message_warn(304, source, target))
 
     # Epilog.
 
@@ -826,7 +714,7 @@ def do_sleep(args):
 
     sleep_time_in_seconds = config.get('sleep_time_in_seconds')
 
-    # Sleep
+    # Sleep.
 
     if sleep_time_in_seconds > 0:
         logging.info(message_info(296, sleep_time_in_seconds))

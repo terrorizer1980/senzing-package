@@ -29,11 +29,6 @@ RUN curl \
  && apt update \
  && rm /senzingrepo_1.0.0-1_amd64.deb
 
-# Copy files from repository.
-
-COPY ./rootfs /
-COPY ./senzing-package.py /app/
-
 # Install system packages
 
 ENV SENZING_ACCEPT_EULA=I_ACCEPT_THE_SENZING_EULA
@@ -41,9 +36,14 @@ RUN apt -y install senzingdata-v1 senzingapi
 
 # Move files.
 
-RUN mv /opt/senzing     /opt/senzing-original \
- && mv /etc/opt/senzing /etc/opt/senzing-original \
- && mv /var/opt/senzing /var/opt/senzing-original \
+RUN mv /opt/senzing     /opt/senzing-original
+
+# Copy files from repository.
+
+COPY ./rootfs /
+COPY ./senzing-package.py /app/
+
+# Execution environment.
 
 WORKDIR /app
 ENTRYPOINT ["/app/senzing-package.py"]
