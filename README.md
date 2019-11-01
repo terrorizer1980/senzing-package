@@ -56,7 +56,6 @@ To see the options for a subcommand, run commands like:
 1. [Demonstrate using Docker](#demonstrate-using-docker)
     1. [Accept docker image](#accept-docker-image)
     1. [Configuration](#configuration)
-    1. [Docker network](#docker-network)
     1. [Docker user](#docker-user)
     1. [Run docker container](#run-docker-container)
 1. [Develop](#develop)
