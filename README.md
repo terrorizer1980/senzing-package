@@ -142,7 +142,6 @@ Configuration values specified by environment variable or command line parameter
 Use if a different userid (UID) is required.
 
 1. :pencil2: Manually identify user.
-   User "0" is root.
    Example:
 
     ```console
