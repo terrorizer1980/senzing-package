@@ -125,8 +125,8 @@ Configuration values specified by environment variable or command line parameter
 
     ```console
     export SENZING_SUBCOMMAND=install
-    export SENZING_DATA_DIR=/opt/my-senzing/data
-    export SENZING_G2_DIR=/opt/my-senzing/g2
+    export SENZING_DATA_DIR=~/my-senzing/data
+    export SENZING_G2_DIR=~/my-senzing/g2
     ```
 
 1. Create directories.
@@ -135,32 +135,6 @@ Configuration values specified by environment variable or command line parameter
     ```console
     mkdir -p ${SENZING_DATA_DIR}
     mkdir -p ${SENZING_G2_DIR}
-    ```
-
-### Docker network
-
-:thinking: **Optional:**  Use if docker container is part of a docker network.
-
-1. List docker networks.
-   Example:
-
-    ```console
-    sudo docker network ls
-    ```
-
-1. :pencil2: Specify docker network.
-   Choose value from NAME column of `docker network ls`.
-   Example:
-
-    ```console
-    export SENZING_NETWORK=*nameofthe_network*
-    ```
-
-1. Construct parameter for `docker run`.
-   Example:
-
-    ```console
-    export SENZING_NETWORK_PARAMETER="--net ${SENZING_NETWORK}"
     ```
 
 ### Docker user
@@ -201,7 +175,6 @@ Use if a different userid (UID) is required.
     ```console
     sudo docker run \
       ${SENZING_RUNAS_USER_PARAMETER} \
-      ${SENZING_NETWORK_PARAMETER} \
       --env SENZING_SUBCOMMAND="${SENZING_SUBCOMMAND}" \
       --rm \
       --volume ${SENZING_DATA_DIR}:/opt/senzing/data \
