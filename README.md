@@ -19,8 +19,8 @@ usage: senzing-package.py [-h]
                           {install,package-version,sleep,version,docker-acceptance-test}
                           ...
 
-Example python skeleton. For more information, see
-https://github.com/Senzing/python-template
+Install Senzing packages. For more information, see
+https://github.com/Senzing/senzing-package
 
 positional arguments:
   {install,package-version,sleep,version,docker-acceptance-test}
