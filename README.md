@@ -127,6 +127,14 @@ Configuration values specified by environment variable or command line parameter
     export SENZING_G2_DIR=/opt/my-senzing/g2
     ```
 
+1. Create directories.
+   Example:
+
+    ```console
+    mkdir -p ${SENZING_DATA_DIR}
+    mkdir -p ${SENZING_G2_DIR}
+    ```
+
 ### Docker network
 
 :thinking: **Optional:**  Use if docker container is part of a docker network.
