@@ -144,7 +144,7 @@ def get_parser():
         },
     }
 
-    parser = argparse.ArgumentParser(prog="senzing-package.py", description="Example python skeleton. For more information, see https://github.com/Senzing/python-template")
+    parser = argparse.ArgumentParser(prog="senzing-package.py", description="Install Senzing packages. For more information, see https://github.com/Senzing/senzing-package")
     subparsers = parser.add_subparsers(dest='subcommand', help='Subcommands (SENZING_SUBCOMMAND):')
 
     for subcommand_key, subcommand_values in subcommands.items():
