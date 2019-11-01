@@ -14,17 +14,19 @@ For more information, scroll down to [Accept docker image](#accept-docker-image)
 To see all of the subcommands, run:
 
 ```console
-$ ./senzing-package.py
-usage: python-template.py [-h]
-                          {install,sleep,version,docker-acceptance-test} ...
+$ ./senzing-package.py --help
+usage: senzing-package.py [-h]
+                          {install,package-version,sleep,version,docker-acceptance-test}
+                          ...
 
 Example python skeleton. For more information, see
 https://github.com/Senzing/python-template
 
 positional arguments:
-  {install,sleep,version,docker-acceptance-test}
+  {install,package-version,sleep,version,docker-acceptance-test}
                         Subcommands (SENZING_SUBCOMMAND):
     install             Copy source data and g2 directories to a target.
+    package-version     Display Senzing Engine version inside docker image.
     sleep               Do nothing but sleep. For Docker testing.
     version             Print version of program.
     docker-acceptance-test
