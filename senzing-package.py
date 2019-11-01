@@ -21,7 +21,7 @@ import zipfile
 __all__ = []
 __version__ = "1.0.0"  # See https://www.python.org/dev/peps/pep-0396/
 __date__ = '2019-03-27'
-__updated__ = '2019-10-31'
+__updated__ = '2019-11-01'
 
 SENZING_PRODUCT_ID = "5003"  # See https://github.com/Senzing/knowledge-base/blob/master/lists/senzing-product-ids.md
 log_format = '%(asctime)s %(message)s'
@@ -134,7 +134,7 @@ def get_parser():
         },
     }
 
-    parser = argparse.ArgumentParser(prog="python-template.py", description="Example python skeleton. For more information, see https://github.com/Senzing/python-template")
+    parser = argparse.ArgumentParser(prog="senzing-package.py", description="Example python skeleton. For more information, see https://github.com/Senzing/python-template")
     subparsers = parser.add_subparsers(dest='subcommand', help='Subcommands (SENZING_SUBCOMMAND):')
 
     for subcommand_key, subcommand_values in subcommands.items():
@@ -437,6 +437,30 @@ def exit_silently():
     sys.exit(0)
 
 # -----------------------------------------------------------------------------
+# Utility functions
+# -----------------------------------------------------------------------------
+
+
+def get_installed_version(config):
+    '''Get version of Senzing seen in senzing_dir.'''
+
+    result = None
+    source_g2_dir = config.get('source_g2_dir')
+    version_file = "{0}/g2BuildVersion.json".format(source_g2_dir)
+
+    # Read version file.
+
+    try:
+        with open(version_file) as version_json_file:
+            version_dictionary = json.load(version_json_file)
+            result = version_dictionary.get('VERSION')
+            logging.info(message_info(130, result, version_file))
+    except:
+        logging.info(message_warn(201, version_file))
+
+    return result
+
+# -----------------------------------------------------------------------------
 # do_* functions
 #   Common function signature: do_XXX(args)
 # -----------------------------------------------------------------------------
@@ -488,6 +512,27 @@ def do_install(args):
         logging.info(message_info(136, source_g2_dir, target_g2_dir))
     except Exception as err:
         logging.info(message_warning(304, source_g2_dir, target_g2_dir, err))
+
+    # Epilog.
+
+    logging.info(exit_template(config))
+
+
+def do_package_version(args):
+    '''Get version in Senzing_API.tgz package.'''
+
+    # Get context from CLI, environment variables, and ini files.
+
+    config = get_configuration(args)
+
+    # Prolog.
+
+    validate_configuration(config)
+    logging.info(entry_template(config))
+
+    # Pull values from configuration.
+
+    get_installed_version(config)
 
     # Epilog.
 
