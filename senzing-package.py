@@ -116,6 +116,16 @@ def get_parser():
                 },
             },
         },
+        'package-version': {
+            "help": 'Display Senzing Engine version inside docker image.',
+            "arguments": {
+                "--source-g2-dir": {
+                    "dest": "source_g2_dir",
+                    "metavar": "SENZING_SOURCE_G2_DIR",
+                    "help": "Source location of Senzing's G2. Default: /opt/senzing-source/g2"
+                },
+            },
+        },
         'sleep': {
             "help": 'Do nothing but sleep. For Docker testing.',
             "arguments": {
@@ -134,7 +144,7 @@ def get_parser():
         },
     }
 
-    parser = argparse.ArgumentParser(prog="senzing-package.py", description="Example python skeleton. For more information, see https://github.com/Senzing/python-template")
+    parser = argparse.ArgumentParser(prog="senzing-package.py", description="Install Senzing packages. For more information, see https://github.com/Senzing/senzing-package")
     subparsers = parser.add_subparsers(dest='subcommand', help='Subcommands (SENZING_SUBCOMMAND):')
 
     for subcommand_key, subcommand_values in subcommands.items():
@@ -185,6 +195,7 @@ message_dictionary = {
     "302": "Cannot move {0} to {1}.",
     "303": "Cannot extract {0} to {1}.",
     "304": "Cannot copy {0} to {1}. Error: {2}",
+    "305": "Cannot determine version. {0} does not exist.",
     "499": "{0}",
     "500": "senzing-" + SENZING_PRODUCT_ID + "{0:04d}E",
     "695": "Unknown database scheme '{0}' in database url '{1}'",
@@ -456,7 +467,7 @@ def get_installed_version(config):
             result = version_dictionary.get('VERSION')
             logging.info(message_info(130, result, version_file))
     except:
-        logging.info(message_warn(201, version_file))
+        logging.info(message_warning(305, version_file))
 
     return result
 

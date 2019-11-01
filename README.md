@@ -14,17 +14,19 @@ For more information, scroll down to [Accept docker image](#accept-docker-image)
 To see all of the subcommands, run:
 
 ```console
-$ ./senzing-package.py
-usage: python-template.py [-h]
-                          {install,sleep,version,docker-acceptance-test} ...
+$ ./senzing-package.py --help
+usage: senzing-package.py [-h]
+                          {install,package-version,sleep,version,docker-acceptance-test}
+                          ...
 
-Example python skeleton. For more information, see
-https://github.com/Senzing/python-template
+Install Senzing packages. For more information, see
+https://github.com/Senzing/senzing-package
 
 positional arguments:
-  {install,sleep,version,docker-acceptance-test}
+  {install,package-version,sleep,version,docker-acceptance-test}
                         Subcommands (SENZING_SUBCOMMAND):
     install             Copy source data and g2 directories to a target.
+    package-version     Display Senzing Engine version inside docker image.
     sleep               Do nothing but sleep. For Docker testing.
     version             Print version of program.
     docker-acceptance-test
@@ -54,7 +56,6 @@ To see the options for a subcommand, run commands like:
 1. [Demonstrate using Docker](#demonstrate-using-docker)
     1. [Accept docker image](#accept-docker-image)
     1. [Configuration](#configuration)
-    1. [Docker network](#docker-network)
     1. [Docker user](#docker-user)
     1. [Run docker container](#run-docker-container)
 1. [Develop](#develop)
@@ -123,8 +124,8 @@ Configuration values specified by environment variable or command line parameter
 
     ```console
     export SENZING_SUBCOMMAND=install
-    export SENZING_DATA_DIR=/opt/my-senzing/data
-    export SENZING_G2_DIR=/opt/my-senzing/g2
+    export SENZING_DATA_DIR=~/my-senzing/data
+    export SENZING_G2_DIR=~/my-senzing/g2
     ```
 
 1. Create directories.
@@ -135,45 +136,17 @@ Configuration values specified by environment variable or command line parameter
     mkdir -p ${SENZING_G2_DIR}
     ```
 
-### Docker network
-
-:thinking: **Optional:**  Use if docker container is part of a docker network.
-
-1. List docker networks.
-   Example:
-
-    ```console
-    sudo docker network ls
-    ```
-
-1. :pencil2: Specify docker network.
-   Choose value from NAME column of `docker network ls`.
-   Example:
-
-    ```console
-    export SENZING_NETWORK=*nameofthe_network*
-    ```
-
-1. Construct parameter for `docker run`.
-   Example:
-
-    ```console
-    export SENZING_NETWORK_PARAMETER="--net ${SENZING_NETWORK}"
-    ```
-
 ### Docker user
 
-:thinking: **Optional:**  The docker container runs as "USER 1001".
+:thinking: **Optional:**  The docker container runs as "USER root" by default.
 Use if a different userid (UID) is required.
 
 1. :pencil2: Manually identify user.
-   User "0" is root.
    Example:
 
     ```console
-    export SENZING_RUNAS_USER="0"
-    export SENZING_RUNAS_GROUP="0"
-
+    export SENZING_RUNAS_USER="1001"
+    export SENZING_RUNAS_GROUP="1001"
     ```
 
    Another option, use current user.
@@ -199,7 +172,6 @@ Use if a different userid (UID) is required.
     ```console
     sudo docker run \
       ${SENZING_RUNAS_USER_PARAMETER} \
-      ${SENZING_NETWORK_PARAMETER} \
       --env SENZING_SUBCOMMAND="${SENZING_SUBCOMMAND}" \
       --rm \
       --volume ${SENZING_DATA_DIR}:/opt/senzing/data \
