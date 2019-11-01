@@ -172,6 +172,8 @@ Use if a different userid (UID) is required.
 
     ```console
     export SENZING_RUNAS_USER="0"
+    export SENZING_RUNAS_GROUP="0"
+
     ```
 
    Another option, use current user.
@@ -179,13 +181,14 @@ Use if a different userid (UID) is required.
 
     ```console
     export SENZING_RUNAS_USER=$(id -u)
+    export SENZING_RUNAS_GROUP=$(id -g)
     ```
 
 1. Construct parameter for `docker run`.
    Example:
 
     ```console
-    export SENZING_RUNAS_USER_PARAMETER="--user ${SENZING_RUNAS_USER}"
+    export SENZING_RUNAS_USER_PARAMETER="--user ${SENZING_RUNAS_USER}:${SENZING_RUNAS_GROUP}"
     ```
 
 ### Run docker container
