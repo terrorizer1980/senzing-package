@@ -138,7 +138,7 @@ Configuration values specified by environment variable or command line parameter
 
 ### Docker user
 
-:thinking: **Optional:**  The docker container runs as "USER 1001".
+:thinking: **Optional:**  The docker container runs as "USER root" by default.
 Use if a different userid (UID) is required.
 
 1. :pencil2: Manually identify user.
@@ -146,9 +146,8 @@ Use if a different userid (UID) is required.
    Example:
 
     ```console
-    export SENZING_RUNAS_USER="0"
-    export SENZING_RUNAS_GROUP="0"
-
+    export SENZING_RUNAS_USER="1001"
+    export SENZING_RUNAS_GROUP="1001"
     ```
 
    Another option, use current user.
