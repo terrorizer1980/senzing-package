@@ -3,4 +3,6 @@ services:
   sut:
     build: .
     entrypoint: [""]
+    environment:
+      SENZING_ACCEPT_EULA: I_ACCEPT_THE_SENZING_EULA
     command: ["/app/container-test.sh"]    
