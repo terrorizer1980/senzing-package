@@ -1,7 +1,12 @@
 #!/bin/bash
 
+echo "hooks/build begin..."
+echo "SENZING_ACCEPT_EULA=${SENZING_ACCEPT_EULA}"
+
 docker build \
-  --build-arg SENZING_ACCEPT_EULA=$SENZING_ACCEPT_EULA \
+  --build-arg SENZING_ACCEPT_EULA=${SENZING_ACCEPT_EULA} \
   -f $DOCKERFILE_PATH \
   -t $IMAGE_NAME \
   .
+
+echo "...hooks/build end"
