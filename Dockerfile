@@ -45,7 +45,9 @@ RUN mv /opt/senzing /opt/senzing-source
 COPY ./rootfs /
 COPY ./senzing-package.py /app/
 
-# Execution environment.
+# Runtime execution.
+
+ENV SENZING_DOCKER_LAUNCHED=true
 
 WORKDIR /app
 ENTRYPOINT ["/app/senzing-package.py"]
