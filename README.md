@@ -105,6 +105,7 @@ To accept the license:
 
 Configuration values specified by environment variable or command line parameter.
 
+- **[SENZING_ACCEPT_EULA](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_accept_eula)**
 - **[SENZING_DATA_DIR](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_data_dir)**
 - **[SENZING_DEBUG](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_debug)**
 - **[SENZING_G2_DIR](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_g2_dir)**
@@ -207,24 +208,47 @@ see [Environment Variables](https://github.com/Senzing/knowledge-base/blob/maste
 
 ### Build docker image for development
 
+To use the Senzing code, you must agree to the End User License Agreement (EULA).
+
+1. :warning: This step is intentionally tricky and not simply copy/paste.
+   This ensures that you make a conscious effort to accept the EULA.
+   See
+   [SENZING_ACCEPT_EULA](https://github.com/Senzing/knowledge-base/blob/master/lists/environment-variables.md#senzing_accept_eula)
+   for the correct value.
+   Replace the double-quote character in the example with the correct value.
+   The use of the double-quote character is intentional to prevent simple copy/paste.
+   Example:
+
+    ```console
+    export SENZING_ACCEPT_EULA="
+    ```
+
 1. **Option #1:** Using `docker` command and GitHub.
 
     ```console
-    sudo docker build --tag senzing/senzing-package https://github.com/senzing/senzing-package.git
+    sudo docker build \
+      --env SENZING_ACCEPT_EULA=${SENZING_ACCEPT_EULA} \
+      --tag senzing/senzing-package \
+      https://github.com/senzing/senzing-package.git
     ```
 
 1. **Option #2:** Using `docker` command and local repository.
 
     ```console
     cd ${GIT_REPOSITORY_DIR}
-    sudo docker build --tag senzing/senzing-package .
+    sudo docker build \
+      --build-arg SENZING_ACCEPT_EULA=${SENZING_ACCEPT_EULA} \
+      --tag senzing/senzing-package \
+      .
     ```
 
 1. **Option #3:** Using `make` command.
 
     ```console
     cd ${GIT_REPOSITORY_DIR}
-    sudo make docker-build
+    sudo \
+      SENZING_ACCEPT_EULA=${SENZING_ACCEPT_EULA}
+      make docker-build
     ```
 
     Note: `sudo make docker-build-development-cache` can be used to create cached docker layers.

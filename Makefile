@@ -8,6 +8,10 @@ GIT_VERSION := $(shell git describe --always --tags --long --dirty | sed -e 's/\
 DOCKER_IMAGE_TAG ?= $(GIT_REPOSITORY_NAME):$(GIT_VERSION)
 DOCKER_IMAGE_NAME := senzing/senzing-package
 
+# Senzing variables
+
+LOCAL_SENZING_ACCEPT_EULA=${SENZING_ACCEPT_EULA}
+
 # -----------------------------------------------------------------------------
 # The first "make" target runs as default.
 # -----------------------------------------------------------------------------
@@ -22,6 +26,7 @@ default: help
 .PHONY: docker-build
 docker-build: docker-rmi-for-build
 	docker build \
+	    --env SENZING_ACCEPT_EULA=$(LOCAL_SENZING_ACCEPT_EULA) \
 	    --tag $(DOCKER_IMAGE_NAME) \
 		--tag $(DOCKER_IMAGE_NAME):$(GIT_VERSION) \
 		.
@@ -29,6 +34,7 @@ docker-build: docker-rmi-for-build
 .PHONY: docker-build-development-cache
 docker-build-development-cache: docker-rmi-for-build-development-cache
 	docker build \
+	    --env SENZING_ACCEPT_EULA=$(LOCAL_SENZING_ACCEPT_EULA) \	
 		--tag $(DOCKER_IMAGE_TAG) \
 		.
 

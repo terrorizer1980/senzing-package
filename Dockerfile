@@ -33,7 +33,8 @@ RUN curl \
 
 # Install system packages.
 
-ENV SENZING_ACCEPT_EULA=I_ACCEPT_THE_SENZING_EULA
+ARG SENZING_ACCEPT_EULA=NO
+ENV SENZING_ACCEPT_EULA=${SENZING_ACCEPT_EULA}
 RUN apt -y install senzingdata-v1 senzingapi
 
 # Move files.
