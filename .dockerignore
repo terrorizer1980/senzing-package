@@ -1,5 +1,7 @@
 .github/
 docs/
+.DS_Store
+.gitignore
 .project
 .pydevproject
 CHANGELOG.md
